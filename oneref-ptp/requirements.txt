@@ -10,6 +10,7 @@ requests
 einops
 tensorboardX
 scipy
+spacy
 ftfy
 opencv-python
 sentencepiece

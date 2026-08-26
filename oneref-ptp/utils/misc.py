@@ -326,6 +326,8 @@ def collate_fn(raw_batch):
         batch = [img_data, text_data, bbox, raw_batch[5], raw_batch[6]]
     else:
         batch = [img_data, phrase, bbox, obj_mask]
+        if len(raw_batch) == 10:
+            batch.append(torch.tensor(np.array(raw_batch[9]), dtype=torch.long))
     return tuple(batch)
 
 
@@ -359,6 +361,8 @@ def collate_fn_mim(raw_batch):
         # batch = [img_data, phrase, bbox, obj_mask]
         """Pass in the version of the original text +mim token and mim pos"""
         batch = [img_data, phrase, bbox, obj_mask, mim_img, mim_mask_pos, mim_vts_labels, mlm_sts_labels]
+        if len(raw_batch) == 14:
+            batch.append(torch.tensor(np.array(raw_batch[13]), dtype=torch.long))
     return tuple(batch)
 
 
@@ -594,6 +598,5 @@ def mdetr_interpolate(input, size=None, scale_factor=None, mode="nearest", align
 
     # empty batch dimension is now supported in pytorch
     return torch.nn.functional.interpolate(input, size, scale_factor, mode, align_corners)
-
 
 

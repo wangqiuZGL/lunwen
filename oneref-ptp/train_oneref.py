@@ -296,11 +296,25 @@ def main(args):
     print("Number of training training per epoch = %d" % num_training_steps_per_epoch)
 
     best_accu = 0
+    if args.output_dir:
+        best_checkpoint_path = os.path.join(args.output_dir, 'best_checkpoint.pth')
+        if os.path.exists(best_checkpoint_path):
+            try:
+                best_checkpoint = torch.load(best_checkpoint_path, map_location='cpu')
+                best_accu = float(best_checkpoint.get('val_accu', 0))
+                print("Existing best_accu from output_dir: {}".format(best_accu))
+            except Exception as exc:
+                print(
+                    "Warning: failed to read existing best checkpoint {}: {}".format(
+                        best_checkpoint_path, exc
+                    )
+                )
 
     if args.finetune and not args.resume:
         val_stats = validate(args, model, data_loader_val, device)
-        best_accu = val_stats['accu']
-        print("Init finetune accu: {}".format(best_accu))
+        best_accu = max(best_accu, val_stats['accu'])
+        print("Init finetune accu: {}".format(val_stats['accu']))
+        print("Current best_accu: {}".format(best_accu))
 
     if args.resume:
         checkpoint = torch.load(args.resume, map_location='cpu')
@@ -312,7 +326,8 @@ def main(args):
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             args.start_epoch = checkpoint['epoch'] + 1
         val_stats = validate(args, model, data_loader_val, device)
-        best_accu = val_stats['accu']
+        best_accu = max(best_accu, val_stats['accu'])
+        print("Resume checkpoint accu: {}".format(val_stats['accu']))
         print("Resume best_accu: {}".format(best_accu))
 
     if args.retrain:

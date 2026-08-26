@@ -64,6 +64,7 @@ class BEiT3(nn.Module):
         incremental_state=None,
         positions=None,
         text_inputs=None,
+        token_pieces=None,
     ):
         assert textual_tokens is not None or visual_tokens is not None
 
@@ -103,6 +104,7 @@ class BEiT3(nn.Module):
             incremental_state=incremental_state,
             positions=positions,
             text_inputs=text_inputs,  # 传递文本输入给句法引导注意力
+            token_pieces=token_pieces,
         )
         encoder_out["multiway_split_position"] = multiway_split_position
 

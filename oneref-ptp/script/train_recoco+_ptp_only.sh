@@ -33,7 +33,7 @@ fi
 echo "=== 阶段1: Warmup 训练（带PTP辅助监督）==="
 CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --nproc_per_node=2 --master_port 28887 --use_env train_oneref.py \
-  --num_workers 8 --epochs 1 --batch_size 64 --lr 0.00025 --lr_scheduler cosine \
+  --num_workers 8 --epochs 10 --batch_size 64 --lr 0.00025 --lr_scheduler cosine \
   --aug_crop --aug_scale --aug_translate \
   --imsize 384 --max_query_len 64 \
   --model beit3_base_patch16_384 --task grounding \
@@ -48,7 +48,7 @@ CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
 echo "=== 阶段2: Finetune 训练（带PTP辅助监督）==="
 CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --nproc_per_node=2 --master_port 28888 --use_env train_oneref.py \
-  --num_workers 8 --epochs 1 --batch_size 22 --lr 0.00003 --lr_scheduler cosine \
+  --num_workers 8 --epochs 20 --batch_size 22 --lr 0.00003 --lr_scheduler cosine \
   --aug_crop --aug_scale --aug_translate \
   --imsize 384 --max_query_len 64 \
   --model beit3_base_patch16_384 --task grounding \
@@ -99,4 +99,3 @@ CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
 #  --output_dir ${OUTPUT_DIR}/ptp_only/recoco+_eval
 #
 #echo "RefCOCO+数据集（仅PTP辅助监督）训练和评估完成！结果保存在 ${OUTPUT_DIR}/ptp_only"
-

@@ -16,17 +16,12 @@ import utils.misc as utils
 from datasets import build_dataset
 from engine import evaluate
 
-import os
-
 """ DO NOT delete the below OneRef model import code ! """
 from timm.models import create_model
 import models.utils as beit3_utils
 import models.OneRef_model as OneRef_model
 from models.utils import NativeScalerWithGradNormCount as NativeScaler
 import models.modeling_vqkd as modeling_vqkd
-
-
-os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 
 def get_args_parser():

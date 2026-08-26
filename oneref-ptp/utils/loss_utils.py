@@ -263,7 +263,7 @@ def one_ref_loss(args, batch_pred, batch_target, tgt_mask, contrastive_loss, vis
                 # losses['loss_mim_vts'] = mim_vts_loss.sum(dim=-1).sum(dim=-1).mean()  # tensor(429.6270, 'cuda:0')
 
     # PTP辅助Loss
-    if args.enable_ptp_aux and ptp_grid_logits is not None and ptp_grid_labels is not None:
+    if getattr(args, "enable_ptp_aux", False) and ptp_grid_logits is not None and ptp_grid_labels is not None:
         ptp_loss_fn = nn.CrossEntropyLoss()
         ptp_loss = ptp_loss_fn(ptp_grid_logits, ptp_grid_labels)
         ptp_loss_weight = getattr(args, 'ptp_loss_weight', 0.1)  # 默认权重0.1
@@ -276,4 +276,3 @@ def one_ref_loss(args, batch_pred, batch_target, tgt_mask, contrastive_loss, vis
             losses['ptp_acc'] = ptp_acc  # 注意：这个不会参与反向传播，只是用于记录
 
     return losses
-

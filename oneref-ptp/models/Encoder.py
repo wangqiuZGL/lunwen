@@ -20,7 +20,7 @@ from torchscale.component.multiway_network import MultiwayWrapper, set_split_pos
 from torchscale.component.relative_position_bias import RelativePositionBias
 from torchscale.component.xmoe.moe_layer import MOELayer
 from torchscale.component.xmoe.routing import Top1Gate, Top2Gate
-from .syntax_guided_attention import create_syntax_guided_attention
+from .syntax_guided_attention import SyntaxBiasBuilder
 
 
 class EncoderLayer(nn.Module):
@@ -104,33 +104,20 @@ class EncoderLayer(nn.Module):
         )
 
     def build_self_attention(self, embed_dim, args):
-        # 检查是否启用句法引导注意力
-        if hasattr(args, 'enable_syntax_bias') and args.enable_syntax_bias:
-            print("Using Syntax-Guided Attention")
-            return create_syntax_guided_attention(
-                args=args,
-                embed_dim=embed_dim,
-                num_heads=args.encoder_attention_heads,
-                dropout=args.attention_dropout,
-                syntax_bias_lambda=getattr(args, 'syntax_bias_lambda', 0.1),
-                enable_syntax_bias=getattr(args, 'enable_syntax_bias', True)
-            )
-        else:
-            # 使用原始的MultiheadAttention
-            return MultiheadAttention(
-                args,
-                embed_dim,
-                args.encoder_attention_heads,
-                dropout=args.attention_dropout,
-                self_attention=True,
-                encoder_decoder_attention=False,
-                subln=args.subln,
-            )
+        return MultiheadAttention(
+            args,
+            embed_dim,
+            args.encoder_attention_heads,
+            dropout=args.attention_dropout,
+            self_attention=True,
+            encoder_decoder_attention=False,
+            subln=args.subln,
+        )
 
     def residual_connection(self, x, residual):
         return residual * self.alpha + x
 
-    def forward(self, x, encoder_padding_mask, attn_mask=None, rel_pos=None, multiway_split_position=None, incremental_state=None, text_inputs=None):
+    def forward(self, x, encoder_padding_mask, attn_mask=None, rel_pos=None, multiway_split_position=None, incremental_state=None):
         if multiway_split_position is not None:
             assert self.args.multiway
             self.apply(set_split_position(multiway_split_position))
@@ -142,31 +129,15 @@ class EncoderLayer(nn.Module):
         if self.normalize_before:
             x = self.self_attn_layer_norm(x)
         
-        # 传递文本输入给句法引导注意力
-        # 检查是否是句法引导注意力类型
-        if hasattr(self.self_attn, 'enable_syntax_bias'):
-            # 如果是句法引导注意力，传递text_inputs参数
-            x, _ = self.self_attn(
-                query=x,
-                key=x,
-                value=x,
-                key_padding_mask=encoder_padding_mask,
-                attn_mask=attn_mask,
-                rel_pos=rel_pos,
-                incremental_state=incremental_state,
-                text_inputs=text_inputs,
-            )
-        else:
-            # 否则使用原始attention，不传递text_inputs参数
-            x, _ = self.self_attn(
-                query=x,
-                key=x,
-                value=x,
-                key_padding_mask=encoder_padding_mask,
-                attn_mask=attn_mask,
-                rel_pos=rel_pos,
-                incremental_state=incremental_state,
-            )
+        x, _ = self.self_attn(
+            query=x,
+            key=x,
+            value=x,
+            key_padding_mask=encoder_padding_mask,
+            attn_mask=attn_mask,
+            rel_pos=rel_pos,
+            incremental_state=incremental_state,
+        )
         x = self.dropout_module(x)
 
         if self.drop_path is not None:
@@ -216,6 +187,16 @@ class Encoder(nn.Module):
 
         self.embed_tokens = embed_tokens
         self.embed_positions = embed_positions
+        self.syntax_bias_builder = (
+            SyntaxBiasBuilder(getattr(args, "syntax_bias_lambda", 0.1))
+            if getattr(args, "enable_syntax_bias", False)
+            else None
+        )
+        if self.syntax_bias_builder is not None:
+            print(
+                "Using syntax bias through native MultiheadAttention "
+                f"(lambda={self.syntax_bias_builder.syntax_bias_lambda})"
+            )
 
         if (
             output_projection is None
@@ -373,6 +354,7 @@ class Encoder(nn.Module):
         incremental_state=None,
         positions=None,
         text_inputs=None,
+        token_pieces=None,
         **kwargs
     ):
         # token_embeddings 是传入的模态信息，src_tokens 默认为 None
@@ -409,6 +391,24 @@ class Encoder(nn.Module):
             rel_pos_bias = self.relative_position(
                 batch_size=x.size(0), qlen=x.size(1), klen=x.size(1)
             )
+        if self.syntax_bias_builder is not None and text_inputs is not None:
+            text_start = (
+                multiway_split_position
+                if multiway_split_position is not None and multiway_split_position >= 0
+                else 0
+            )
+            syntax_bias = self.syntax_bias_builder.build(
+                text_inputs=text_inputs,
+                token_pieces=token_pieces,
+                sequence_length=x.size(1),
+                text_start=text_start,
+                text_length=x.size(1) - text_start,
+                num_heads=self.args.encoder_attention_heads,
+                device=x.device,
+                dtype=x.dtype,
+            )
+            if syntax_bias is not None:
+                rel_pos_bias = syntax_bias if rel_pos_bias is None else rel_pos_bias + syntax_bias
 
         # incremental_state is not None during inference if we use the bidirectional encoder as a generator
         # as in s2s-ft (https://arxiv.org/abs/2110.13640)
@@ -423,7 +423,6 @@ class Encoder(nn.Module):
                 rel_pos=rel_pos_bias,
                 multiway_split_position=multiway_split_position,
                 incremental_state=incremental_state[idx] if incremental_state is not None else None,
-                text_inputs=text_inputs,  # 传递文本输入给句法引导注意力
             )
             if return_all_hiddens:
                 assert encoder_states is not None

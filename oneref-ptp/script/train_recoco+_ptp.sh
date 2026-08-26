@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # ========== 环境配置 ==========
 export CUDA_VISIBLE_DEVICES=0,1
 echo "train_recoco+_with_ptp_auxiliary.sh"
@@ -8,12 +10,12 @@ echo "train_recoco+_with_ptp_auxiliary.sh"
 DATA_ROOT=/root/shared-nvme/oneref/data/image_data
 SPLIT_ROOT=/root/shared-nvme/oneref/data/ref_data_shuffled
 BEIT3_CHECKPOINT=/root/shared-nvme/oneref/data/beit3_checkpoint
-OUTPUT_DIR=/root/shared-nvme/oneref/output_test
+OUTPUT_DIR=/root/shared-nvme/oneref/output_formal
 # ==============================
 
 # ========== 句法引导注意力参数 ==========
 ENABLE_SYNTAX_BIAS=true  # 是否启用句法引导注意力
-SYNTAX_BIAS_LAMBDA=0.5   # 句法偏置强度（建议值：0.05, 0.1, 0.2, 0.5）
+SYNTAX_BIAS_LAMBDA=0.1   # 与 Syntax-only 消融保持一致
 # =====================================
 
 # ========== PTP辅助监督参数 ==========
@@ -24,6 +26,20 @@ PTP_LOSS_WEIGHT=0.1      # PTP Loss权重（建议值：0.05, 0.1, 0.2）
 
 # 创建输出目录
 mkdir -p ${OUTPUT_DIR}/ptp_auxiliary
+exec > >(tee -a "${OUTPUT_DIR}/ptp_auxiliary/train.log") 2>&1
+echo "训练结果将保存到 ${OUTPUT_DIR}/ptp_auxiliary"
+
+select_checkpoint() {
+    local checkpoint_dir=$1
+    if [ -f "${checkpoint_dir}/best_checkpoint.pth" ]; then
+        echo "${checkpoint_dir}/best_checkpoint.pth"
+    elif [ -f "${checkpoint_dir}/checkpoint.pth" ]; then
+        echo "${checkpoint_dir}/checkpoint.pth"
+    else
+        echo "未找到 checkpoint: ${checkpoint_dir}" >&2
+        return 1
+    fi
+}
 
 # 根据 ENABLE_SYNTAX_BIAS 设置参数
 SYNTAX_ARGS=""
@@ -47,7 +63,7 @@ fi
 echo "=== 阶段1: Warmup 训练（带PTP辅助监督）==="
 CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --nproc_per_node=2 --master_port 28887 --use_env train_oneref.py \
-  --num_workers 8 --epochs 1 --batch_size 64 --lr 0.00025 --lr_scheduler cosine \
+  --num_workers 8 --epochs 10 --batch_size 64 --lr 0.00025 --lr_scheduler cosine \
   --aug_crop --aug_scale --aug_translate \
   --imsize 384 --max_query_len 64 \
   --model beit3_base_patch16_384 --task grounding \
@@ -58,20 +74,24 @@ CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_warmup  \
   ${SYNTAX_ARGS} ${PTP_ARGS}
 
+WARMUP_CHECKPOINT=$(select_checkpoint "${OUTPUT_DIR}/ptp_auxiliary/recoco+_warmup")
+
 ######## 2. Finetune 训练（RefCOCO+ / unc+）—— 使用句法引导注意力和PTP辅助监督
 echo "=== 阶段2: Finetune 训练（带句法引导注意力和PTP辅助监督）==="
 CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --nproc_per_node=2 --master_port 28888 --use_env train_oneref.py \
-  --num_workers 8 --epochs 1 --batch_size 22 --lr 0.00003 --lr_scheduler cosine \
+  --num_workers 8 --epochs 20 --batch_size 22 --lr 0.00003 --lr_scheduler cosine \
   --aug_crop --aug_scale --aug_translate \
   --imsize 384 --max_query_len 64 \
   --model beit3_base_patch16_384 --task grounding \
   --dataset unc+ --use_regress_box --use_box_mask_constraints \
   --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
-  --finetune ${OUTPUT_DIR}/ptp_auxiliary/recoco+_warmup/best_checkpoint.pth \
+  --finetune ${WARMUP_CHECKPOINT} \
   --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
   --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_finetune \
   ${SYNTAX_ARGS} ${PTP_ARGS}
+
+FINETUNE_CHECKPOINT=$(select_checkpoint "${OUTPUT_DIR}/ptp_auxiliary/recoco+_finetune")
 
 ######## 3. 评估（RefCOCO+ / unc+ / val）
 echo "=== 阶段3: 模型评估 (val) ==="
@@ -83,37 +103,36 @@ CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
   --dataset unc+ --eval_set val \
   --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
   --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
-  --eval_model ${OUTPUT_DIR}/ptp_auxiliary/recoco+_finetune/best_checkpoint.pth \
+  --eval_model ${FINETUNE_CHECKPOINT} \
   --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_eval  \
   ${SYNTAX_ARGS}
 
-######### 4. 评估（RefCOCO+ / unc+ / testA）
-#echo "=== 阶段4: 模型评估 (testA) ==="
-#CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
-#  --nproc_per_node=2 --master_port 28890 --use_env eval.py \
-#  --num_workers 4 --batch_size 32 \
-#  --imsize 384 --max_query_len 64 \
-#  --model beit3_base_patch16_384 --task grounding \
-#  --dataset unc+ --eval_set testA \
-#  --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
-#  --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
-#  --eval_model ${OUTPUT_DIR}/ptp_auxiliary/recoco+_finetune/best_checkpoint.pth \
-#  --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_eval \
-#  ${SYNTAX_ARGS}
-#
-######### 5. 评估（RefCOCO+ / unc+ / testB）
-#echo "=== 阶段5: 模型评估 (testB) ==="
-#CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
-#  --nproc_per_node=2 --master_port 28891 --use_env eval.py \
-#  --num_workers 4 --batch_size 32 \
-#  --imsize 384 --max_query_len 64 \
-#  --model beit3_base_patch16_384 --task grounding \
-#  --dataset unc+ --eval_set testB \
-#  --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
-#  --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
-#  --eval_model ${OUTPUT_DIR}/ptp_auxiliary/recoco+_finetune/best_checkpoint.pth \
-#  --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_eval \
-#  ${SYNTAX_ARGS}
-#
-#echo "RefCOCO+数据集（带PTP辅助监督）训练和评估完成！结果保存在 ${OUTPUT_DIR}/ptp_auxiliary"
+######## 4. 评估（RefCOCO+ / unc+ / testA）
+echo "=== 阶段4: 模型评估 (testA) ==="
+CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
+  --nproc_per_node=2 --master_port 28890 --use_env eval.py \
+  --num_workers 4 --batch_size 32 \
+  --imsize 384 --max_query_len 64 \
+  --model beit3_base_patch16_384 --task grounding \
+  --dataset unc+ --eval_set testA \
+  --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
+  --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
+  --eval_model ${FINETUNE_CHECKPOINT} \
+  --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_eval \
+  ${SYNTAX_ARGS}
 
+######## 5. 评估（RefCOCO+ / unc+ / testB）
+echo "=== 阶段5: 模型评估 (testB) ==="
+CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch \
+  --nproc_per_node=2 --master_port 28891 --use_env eval.py \
+  --num_workers 4 --batch_size 32 \
+  --imsize 384 --max_query_len 64 \
+  --model beit3_base_patch16_384 --task grounding \
+  --dataset unc+ --eval_set testB \
+  --sentencepiece_model ${BEIT3_CHECKPOINT}/beit3.spm \
+  --data_root ${DATA_ROOT} --split_root ${SPLIT_ROOT}/single_dataset \
+  --eval_model ${FINETUNE_CHECKPOINT} \
+  --output_dir ${OUTPUT_DIR}/ptp_auxiliary/recoco+_eval \
+  ${SYNTAX_ARGS}
+
+echo "RefCOCO+ Syntax+PTP 训练和评估完成！结果保存在 ${OUTPUT_DIR}/ptp_auxiliary"

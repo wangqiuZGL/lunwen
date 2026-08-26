@@ -15,7 +15,6 @@ import utils.misc as utils
 import utils.loss_utils as loss_utils
 import utils.eval_utils as eval_utils
 from utils.box_utils import xywh2xyxy
-import numpy as np
 
 
 def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
@@ -31,10 +30,11 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
     for data_iter_step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         step = data_iter_step // args.update_freq
         global_step = start_steps + step  # global training iteration
-        # 处理batch，支持PTP辅助监督
-        if args.enable_ptp_aux and len(batch) == 10:
-            img_data, text_data, target, obj_mask, img_file, phrase, bbox_ori, obj_mask_orig, grid_label = batch
-            grid_label = torch.tensor(grid_label, dtype=torch.long).to(device) if isinstance(grid_label, (list, np.ndarray)) else grid_label.to(device)
+        if getattr(args, "enable_ptp_aux", False):
+            if len(batch) != 5:
+                raise ValueError(f"PTP training expects a 5-item batch, got {len(batch)}")
+            img_data, text_data, target, obj_mask, grid_label = batch
+            grid_label = grid_label.to(device)
         else:
             img_data, text_data, target, obj_mask = batch[:4]
             grid_label = None
@@ -53,14 +53,18 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
                                             mlm_loss=mlm_loss,
                                             ptp_grid_logits=ptp_grid_logits,
                                             ptp_grid_labels=grid_label)
+        if getattr(args, "enable_ptp_aux", False) and "loss_ptp" not in loss_dict:
+            raise RuntimeError("PTP is enabled but loss_ptp was not produced")
 
-        losses = sum(loss_dict[k] for k in loss_dict.keys())
+        losses = sum(value for key, value in loss_dict.items() if key.startswith("loss_"))
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = utils.reduce_dict(loss_dict)
         loss_dict_reduced_unscaled = {k: v
                                       for k, v in loss_dict_reduced.items()}
-        losses_reduced_unscaled = sum(loss_dict_reduced_unscaled.values())
+        losses_reduced_unscaled = sum(
+            value for key, value in loss_dict_reduced_unscaled.items() if key.startswith("loss_")
+        )
         loss_value = losses_reduced_unscaled.item()
 
         if not math.isfinite(loss_value):
@@ -107,11 +111,11 @@ def train_one_epoch_with_mrefm(args, model: torch.nn.Module, vqkd: torch.nn.Modu
             enable_ref_mim = False
             enable_ref_mlm = True
 
-        # 处理batch，支持PTP辅助监督
-        # MRefM训练时batch格式: img_data, text_data, target, obj_mask, mim_img, mim_mask_pos, mim_vts_labels, mlm_sts_labels, [grid_label]
-        if args.enable_ptp_aux and len(batch) == 9:
+        if getattr(args, "enable_ptp_aux", False):
+            if len(batch) != 9:
+                raise ValueError(f"PTP MRefM training expects a 9-item batch, got {len(batch)}")
             img_data, text_data, target, obj_mask, mim_img, mim_mask_pos, mim_vts_labels, mlm_sts_labels, grid_label = batch
-            grid_label = torch.tensor(grid_label, dtype=torch.long).to(device) if isinstance(grid_label, (list, np.ndarray)) else grid_label.to(device)
+            grid_label = grid_label.to(device)
         else:
             img_data, text_data, target, obj_mask, mim_img, mim_mask_pos, mim_vts_labels, mlm_sts_labels = batch[:8]
             grid_label = None
@@ -140,28 +144,22 @@ def train_one_epoch_with_mrefm(args, model: torch.nn.Module, vqkd: torch.nn.Modu
                   obj_mask=obj_mask, enable_ref_mim=enable_ref_mim, enable_ref_mlm=enable_ref_mlm, training=True)
         # The `loss_dict` is a dictionary that contains `l1_smooth` and `giou`.
         
-        # 处理PTP grid_label（如果启用）
-        grid_label = None
-        if args.enable_ptp_aux and len(batch) > 8:
-            # batch格式: img_data, text_data, target, obj_mask, mim_img, mim_mask_pos, mim_vts_labels, mlm_sts_labels, ...
-            # 如果启用PTP，grid_label应该在最后
-            if len(batch) >= 9:
-                grid_label = batch[8] if len(batch) == 9 else (batch[-1] if len(batch) > 9 else None)
-                if grid_label is not None:
-                    grid_label = torch.tensor(grid_label, dtype=torch.long).to(device) if isinstance(grid_label, (list, np.ndarray)) else grid_label.to(device)
-        
         loss_dict = loss_utils.one_ref_loss(args, pred_box, target, obj_mask, contrastive_loss, visu_sim, seg_mask,
                                             mim_pred, mim_labels, mim_vts_pred, mim_vts_labels,
                                             mlm_loss, mlm_sts_pred, mlm_sts_labels,
                                             ptp_grid_logits=ptp_grid_logits,
                                             ptp_grid_labels=grid_label)
+        if getattr(args, "enable_ptp_aux", False) and "loss_ptp" not in loss_dict:
+            raise RuntimeError("PTP is enabled but loss_ptp was not produced")
 
-        losses = sum(loss_dict[k] for k in loss_dict.keys())
+        losses = sum(value for key, value in loss_dict.items() if key.startswith("loss_"))
 
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = utils.reduce_dict(loss_dict)
         loss_dict_reduced_unscaled = {k: v for k, v in loss_dict_reduced.items()}
-        losses_reduced_unscaled = sum(loss_dict_reduced_unscaled.values())
+        losses_reduced_unscaled = sum(
+            value for key, value in loss_dict_reduced_unscaled.items() if key.startswith("loss_")
+        )
         loss_value = losses_reduced_unscaled.item()
 
         if not math.isfinite(loss_value):
@@ -191,7 +189,7 @@ def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
     header = 'Eval:'
 
     for batch in metric_logger.log_every(data_loader, 10, header):
-        img_data, text_data, target, tgt_mask = batch
+        img_data, text_data, target, tgt_mask = batch[:4]
         batch_size = img_data.tensors.size(0)
         # copy to GPU
         img_data = img_data.to(device)
@@ -231,7 +229,7 @@ def evaluate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
     gt_mask_list = []
 
     for _, batch in enumerate(tqdm(data_loader)):
-        img_data, text_data, target, tgt_mask = batch
+        img_data, text_data, target, tgt_mask = batch[:4]
         batch_size = img_data.tensors.size(0)
         # copy to GPU
         img_data = img_data.to(device)
@@ -292,7 +290,7 @@ def evaluate_hivg(args, model: torch.nn.Module, data_loader: Iterable, device: t
     gt_mask_list = []
 
     for _, batch in enumerate(tqdm(data_loader)):
-        img_data, text_data, target, tgt_mask = batch
+        img_data, text_data, target, tgt_mask = batch[:4]
         batch_size = img_data.tensors.size(0)
         # copy to GPU
         img_data = img_data.to(device)
@@ -395,7 +393,7 @@ def evaluate_clip_vg(args, model: torch.nn.Module, data_loader: Iterable, device
     pred_box_list = []
     gt_box_list = []
     for _, batch in enumerate(tqdm(data_loader)):
-        img_data, text_data, target, obj_mask = batch
+        img_data, text_data, target, obj_mask = batch[:4]
         batch_size = img_data.tensors.size(0)
         # copy to GPU
         img_data = img_data.to(device)
@@ -425,4 +423,3 @@ def evaluate_clip_vg(args, model: torch.nn.Module, data_loader: Iterable, device
     accuracy = float(result_tensor[0]) / float(result_tensor[1])
 
     return accuracy
-

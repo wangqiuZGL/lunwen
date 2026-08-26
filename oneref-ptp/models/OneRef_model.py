@@ -83,6 +83,12 @@ def get_sentencepiece_model_for_beit3(args):
     return XLMRobertaTokenizer(args.sentencepiece_model)
 
 
+def apply_syntax_config(model_args, sys_args):
+    model_args.enable_syntax_bias = getattr(sys_args, "enable_syntax_bias", False)
+    model_args.syntax_bias_lambda = getattr(sys_args, "syntax_bias_lambda", 0.1)
+    return model_args
+
+
 class TwoLayerMLP(nn.Module):
     def __init__(
             self,
@@ -163,8 +169,6 @@ class BEiT3ForGrounding(BEiT3Wrapper):
 
         self.use_contrastive_loss = sys_args.use_contrastive_loss
         self.use_mask_loss = sys_args.use_mask_loss
-        # 保存句法开关以便前向检查
-        self.enable_syntax_bias = getattr(sys_args, 'enable_syntax_bias', False)
         if self.use_mask_loss:
             deconv_hidden_dim = args.encoder_embed_dim
             self.seg_conv1 = nn.ConvTranspose2d(in_channels=deconv_hidden_dim, out_channels=deconv_hidden_dim,
@@ -284,7 +288,7 @@ class BEiT3ForGrounding(BEiT3Wrapper):
         return tokens, bool_masked_pos
 
     def _get_text_token_and_padding_mask(self, text_batch, device):
-        language_tokens, padding_masks = [], []
+        language_tokens, padding_masks, token_pieces = [], [], []
         for text in text_batch:
             tokens = self.tokenizer.tokenize(text)
             token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
@@ -293,7 +297,12 @@ class BEiT3ForGrounding(BEiT3Wrapper):
             language_token, padding_mask, num_tokens = self._get_text_segment(token_ids)
             language_tokens.append(language_token)
             padding_masks.append(padding_mask)
-        return torch.tensor(language_tokens).to(device), torch.tensor(padding_masks).to(device)
+            token_pieces.append(tokens[: self.num_max_bpe_tokens - 2])
+        return (
+            torch.tensor(language_tokens).to(device),
+            torch.tensor(padding_masks).to(device),
+            token_pieces,
+        )
 
     def _find_index(self, string_list, target_string):
         try:
@@ -305,6 +314,7 @@ class BEiT3ForGrounding(BEiT3Wrapper):
     def _get_text_token_and_masking_modeling(self, text_batch, device):
         language_tokens, padding_masks = [], []
         masked_tokens, language_masked_poses = [], []
+        token_pieces = []
         for text in text_batch:
             doc = nlp(text)
             subject = get_subject_phrase(doc)
@@ -323,33 +333,33 @@ class BEiT3ForGrounding(BEiT3Wrapper):
             padding_masks.append(padding_mask)
             masked_tokens.append(masked_token)
             language_masked_poses.append(language_masked_pos)
+            token_pieces.append(tokens[: self.num_max_bpe_tokens - 2])
 
-        return torch.tensor(language_tokens).to(device), torch.tensor(padding_masks).to(device), \
-               torch.tensor(masked_tokens).to(device), torch.tensor(language_masked_poses).to(device)
+        return (
+            torch.tensor(language_tokens).to(device),
+            torch.tensor(padding_masks).to(device),
+            torch.tensor(masked_tokens).to(device),
+            torch.tensor(language_masked_poses).to(device),
+            token_pieces,
+        )
 
     def forward(self, image=None, img_mask=None, text=None, text_len=None, global_step=None, mim_masked_pos=None,
                 use_plain_text=True, obj_mask=None, enable_ref_mim=None, enable_ref_mlm=None, training=False, **kwargs):
         assert image is not None and text is not None
         masked_tokens, language_masked_pos = None, None
+        token_pieces = None
         
         # 准备文本输入用于句法引导注意力
         text_inputs = text if use_plain_text else None
         
-        # 调试：检查text_inputs的类型（仅在评估时打印一次）
-        if not training and self.enable_syntax_bias and text_inputs is not None:
-            if not hasattr(self, '_debug_printed'):
-                print(f"[DEBUG] Evaluation mode: text_inputs type = {type(text_inputs)}, "
-                      f"is_list = {isinstance(text_inputs, (list, tuple))}, "
-                      f"len = {len(text_inputs) if isinstance(text_inputs, (list, tuple)) else 'N/A'}, "
-                      f"first_elem_type = {type(text_inputs[0]) if isinstance(text_inputs, (list, tuple)) and len(text_inputs) > 0 else 'N/A'}")
-                self._debug_printed = True
-        
         if use_plain_text:  # default
             if training and enable_ref_mlm:
-                text_tokens, padding_mask, masked_tokens, language_masked_pos \
+                text_tokens, padding_mask, masked_tokens, language_masked_pos, token_pieces \
                     = self._get_text_token_and_masking_modeling(text, image.device)
             else:
-                text_tokens, padding_mask = self._get_text_token_and_padding_mask(text, image.device)
+                text_tokens, padding_mask, token_pieces = self._get_text_token_and_padding_mask(
+                    text, image.device
+                )
         else:
             text_tokens, padding_mask = text.tensors, text.mask
 
@@ -362,11 +372,11 @@ class BEiT3ForGrounding(BEiT3Wrapper):
         if training and enable_ref_mlm:
             outputs = self.beit3(textual_tokens=masked_tokens, visual_tokens=image, text_padding_position=padding_mask,
                                  vision_masked_position=mim_masked_pos, return_all_hiddens=self.return_all_hiddens,
-                                 text_inputs=text_inputs)
+                                 text_inputs=text_inputs, token_pieces=token_pieces)
         else:
             outputs = self.beit3(textual_tokens=text_tokens, visual_tokens=image, text_padding_position=padding_mask,
                                  vision_masked_position=mim_masked_pos, return_all_hiddens=self.return_all_hiddens,
-                                 text_inputs=text_inputs)
+                                 text_inputs=text_inputs, token_pieces=token_pieces)
             # flops1 = FlopCountAnalysis(self.beit3, (text_tokens, image))
             # print("BEiT3 FLOPs:", flops1.total())  # BEiT3 FLOPs: 8008 375 566 336
 
@@ -451,21 +461,21 @@ class BEiT3ForGrounding(BEiT3Wrapper):
 
 @register_model
 def beit3_base_patch16_384_grounding(sys_args, pretrained=False, **kwargs):
-    args = _get_base_config(img_size=384, **kwargs)  # Return the basic model configuration information.
+    args = apply_syntax_config(_get_base_config(img_size=384, **kwargs), sys_args)
     model = BEiT3ForGrounding(sys_args, args, **kwargs)
     return model
 
 
 @register_model
 def beit3_base_patch16_480_grounding(sys_args, pretrained=False, **kwargs):
-    args = _get_base_config(img_size=480, **kwargs)  # Return the basic model configuration information.
+    args = apply_syntax_config(_get_base_config(img_size=480, **kwargs), sys_args)
     model = BEiT3ForGrounding(sys_args, args, **kwargs)
     return model
 
 
 @register_model
 def beit3_large_patch16_384_grounding(sys_args, pretrained=False, **kwargs):
-    args = _get_large_config(img_size=384, **kwargs)  # Return the basic model configuration information.
+    args = apply_syntax_config(_get_large_config(img_size=384, **kwargs), sys_args)
     model = BEiT3ForGrounding(sys_args, args, **kwargs)
     return model
 
@@ -482,4 +492,3 @@ class MLP(nn.Module):
         for i, layer in enumerate(self.layers):
             x = F.relu(layer(x)) if i < self.num_layers - 1 else layer(x)
         return x
-
