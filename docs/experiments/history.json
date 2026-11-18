@@ -1,0 +1,53 @@
+{
+  "record_date": "2026-11-18",
+  "metric_units": "fractions in JSON; percentages in README; deltas in percentage points",
+  "source": {
+    "kind": "prior_chat_completion_reports",
+    "thread_id": "01a1d405-cbc0-7a80-97f4-08aaf443d8db",
+    "raw_server_logs_downloaded_this_session": false,
+    "note": "SSH public-key login failed; historical values are transcribed, not newly measured."
+  },
+  "shared_config": {
+    "dataset": "RefCOCO+", "train_fraction_by_image": 0.2,
+    "subset_seed": 42, "training_seed": 42, "validation": "full official val",
+    "model": "beit3_base_patch16_384", "warmup_epochs": 2, "finetune_epochs": 8,
+    "image_size": 384, "max_query_len": 64, "amp": true,
+    "warmup_batch": 8, "warmup_accumulation": 4,
+    "warmup_lr": 0.00025, "finetune_lr": 0.00003
+  },
+  "runs": [
+    {
+      "name": "baseline_train_20261118", "status": "historically_reported_complete",
+      "sadb": false, "tcgs": false,
+      "val_acc_at_0_5": 0.7340, "reported_val_mean_iou": 0.6223,
+      "finetune_batch": 16, "finetune_accumulation": 2,
+      "server_directory": "/hy-tmp/lunwen-runs/baseline_train_20261118",
+      "testA": null, "testB": null
+    },
+    {
+      "name": "fused_train_20261118", "status": "historically_reported_complete",
+      "sadb": true, "syntax_lambda": 0.1, "tcgs": true,
+      "tcgs_grid_size": 16, "tcgs_weight": 0.1,
+      "val_acc_at_0_5": 0.7321, "reported_val_mean_iou": 0.6208,
+      "acc_delta_percentage_points_vs_baseline": -0.19,
+      "miou_delta_percentage_points_vs_baseline": -0.15,
+      "limitations": ["single seed", "20% training images", "first two finetuning epochs batch8/accum4, then batch16/accum2", "resumed during training", "metric epoch alignment not reverified"],
+      "historical_tcgs_training_accuracy_approx": 0.016,
+      "backup_paths_reported": ["oss://datasets/experiments/fused_train_20261118_1458.tar", "oss://datasets/experiments/fused_train_20261118_1458_records.zip"],
+      "testA": null, "testB": null
+    },
+    {
+      "name": "sadb_only_train_20261118", "status": "started_previously_final_result_unverified",
+      "sadb": true, "syntax_lambda": 0.1, "tcgs": false,
+      "finetune_batch": 16, "finetune_accumulation": 2,
+      "server_directory": "/hy-tmp/lunwen-runs/sadb_only_train_20261118",
+      "val_acc_at_0_5": null, "reported_val_mean_iou": null,
+      "testA": null, "testB": null
+    },
+    {
+      "name": "paired_instance_supervision", "status": "implemented_not_trained",
+      "val_acc_at_0_5": null, "reported_val_mean_iou": null,
+      "testA": null, "testB": null
+    }
+  ]
+}

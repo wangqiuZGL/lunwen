@@ -1,0 +1,4 @@
+run_id,variant,subset_sha256,code_commit,seed,pair_weight,epochs_completed,best_epoch,val_acc_at_0_5,val_mean_iou_at_same_epoch,delta_vs_A_percentage_points,delta_vs_B_percentage_points,actual_pairs,valid_comparisons,wall_time_seconds,peak_gpu_memory_mb,prediction_file,checkpoint_file,status,notes
+,A,,,42,0,,,,,,,,,,,,,not_run,
+,B,,,42,0,,,,,,,,,,,,,not_run,
+,C,,,42,0.1,,,,,,,,,,,,,not_run,

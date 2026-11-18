@@ -1,0 +1,21 @@
+# Tested on the server's Python 3.8.10 / CUDA 11.8 image.
+torch==2.0.0
+torchvision==0.15.1
+numpy==1.24.4
+scipy==1.10.1
+timm==0.6.13
+torchscale==0.3.0
+fairscale==0.4.0
+transformers==4.30.2
+sentencepiece==0.1.99
+spacy==3.7.5
+torchmetrics==0.11.4
+opencv-python-headless==4.8.1.78
+fvcore==0.1.5.post20221221
+tensorboardX==2.6.2.2
+einops==0.8.1
+ftfy==6.2.3
+pycocotools==2.0.7
+blobfile==3.1.0
+pytest==8.3.5
+# Install en_core_web_md 3.7.1 separately.

@@ -1,0 +1,22 @@
+# Datasets and experiment artifacts belong outside the repository.
+data/
+image_data/
+ref_data_shuffled/
+beit3_checkpoints/
+checkpoints/
+output/
+outputs/
+runs/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.spm
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.log
+__pycache__/
+.env
+.env.*

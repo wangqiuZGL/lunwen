@@ -104,6 +104,18 @@ def get_args_parser():
     # label smoothing for imagenet and captioning
     parser.add_argument('--label_smoothing', type=float, default=0.1)
     parser.add_argument('--update_freq', default=1, type=int)
+    parser.add_argument('--amp', action='store_true', help='CUDA mixed precision for downstream REC training')
+    parser.add_argument('--limit_train_samples', default=0, type=int, help='Smoke check only; 0 keeps all training samples')
+    parser.add_argument('--limit_val_samples', default=0, type=int, help='Smoke check only; 0 keeps full validation')
+    # Optional training-only same-image instance discrimination. Defaults preserve old data flow.
+    parser.add_argument('--enable_pair_sampling', action='store_true')
+    parser.add_argument('--pair_loss_weight', type=float, default=0.0)
+    parser.add_argument('--pair_margin', type=float, default=0.1)
+    parser.add_argument('--pair_fraction', type=float, default=0.5,
+                        help='Maximum fraction of sample slots allocated to pairs')
+    parser.add_argument('--pair_max_iou', type=float, default=0.5)
+    parser.add_argument('--pair_min_patches', type=int, default=1)
+    parser.add_argument('--export_val_predictions', action='store_true')
 
     # mim pretraining
     # cls-pretraining settings
@@ -172,6 +184,8 @@ def get_args_parser():
 def main(args):
     """ distribution init """
     utils.init_distributed_mode(args)
+    from utils.pair_supervision import validate_pair_config
+    validate_pair_config(args)
     print("git:\n  {}\n".format(utils.get_sha()))
     device = torch.device(args.device)
 
@@ -274,6 +288,13 @@ def main(args):
 
     # note certain dataset does not have 'test' set: eg. 'unc': {'train', 'val', 'trainval', 'testA', 'testB'}
     dataset_val = build_dataset('val', args)
+    if args.limit_train_samples:
+        dataset_train.images = dataset_train.images[:args.limit_train_samples]
+    if args.limit_val_samples:
+        dataset_val.images = dataset_val.images[:args.limit_val_samples]
+    if args.update_freq < 1:
+        raise ValueError('update_freq must be positive')
+    scaler = torch.cuda.amp.GradScaler(enabled=args.amp and device.type == 'cuda')
 
     if args.distributed:
         sampler_train = DistributedSampler(dataset_train, shuffle=True)
@@ -283,13 +304,37 @@ def main(args):
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
 
     batch_sampler_train = torch.utils.data.BatchSampler(sampler_train, args.batch_size, drop_last=True)
+    train_collate = utils.collate_fn
+    val_collate = utils.collate_fn
+    if args.enable_pair_sampling:
+        from utils.pair_supervision import PairIndex, PairBatchSampler
+        from utils.pair_data import PairedDataset, paired_collate
+        pair_index = PairIndex(dataset_train.images, max_iou=args.pair_max_iou)
+        audit = pair_index.audit()
+        if not audit['candidate_pairs']:
+            raise ValueError('No eligible pairs in training subset; inspect data audit first')
+        print('Pair data audit:', json.dumps(audit))
+        if args.output_dir:
+            Path(args.output_dir, 'pair_audit.json').write_text(json.dumps(audit, indent=2), encoding='utf-8')
+        batch_sampler_train = PairBatchSampler(pair_index, args.batch_size, seed=args.seed,
+                                               pair_fraction=args.pair_fraction)
+        dataset_train = PairedDataset(dataset_train)
+        train_collate = paired_collate
+    if args.export_val_predictions:
+        from utils.prediction_records import IndexedDataset, indexed_collate
+        dataset_val = IndexedDataset(dataset_val)
+        val_collate = indexed_collate
+    if args.output_dir and utils.is_main_process():
+        Path(args.output_dir, 'config.json').write_text(json.dumps(vars(args), indent=2), encoding='utf-8')
     """ Note: MRefM pretraining need use new dataloader utils.collate_fn_mim"""
     data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,
-                                   collate_fn=utils.collate_fn, num_workers=args.num_workers)
+                                   collate_fn=train_collate, num_workers=args.num_workers)
     data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
-                                 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
+                                 drop_last=False, collate_fn=val_collate, num_workers=args.num_workers)
     total_batch_size = args.batch_size * args.update_freq * utils.get_world_size()
-    num_training_steps_per_epoch = len(data_loader_train.dataset) // total_batch_size
+    num_training_steps_per_epoch = math.ceil(len(data_loader_train) / args.update_freq)
+    if not len(data_loader_train):
+        raise ValueError('Training subset is smaller than batch_size')
     print("LR = %.8f" % args.lr)
     print("Total batch size = %d" % total_batch_size)
     print("Update frequent = %d" % args.update_freq)
@@ -325,6 +370,8 @@ def main(args):
             optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             args.start_epoch = checkpoint['epoch'] + 1
+            if 'scaler' in checkpoint:
+                scaler.load_state_dict(checkpoint['scaler'])
         val_stats = validate(args, model, data_loader_val, device)
         best_accu = max(best_accu, val_stats['accu'])
         print("Resume checkpoint accu: {}".format(val_stats['accu']))
@@ -350,10 +397,20 @@ def main(args):
         start_ep_time = time.time()
         if args.distributed:
             sampler_train.set_epoch(epoch)
+        if args.enable_pair_sampling:
+            batch_sampler_train.set_epoch(epoch)
+            if args.output_dir:
+                manifest = batch_sampler_train.manifest()
+                if not manifest['pairs']:
+                    raise ValueError('This epoch contains no pairs; increase batch/pair fraction or inspect coverage')
+                Path(args.output_dir, 'pair_schedule_epoch_%03d.json' % epoch).write_text(
+                    json.dumps(manifest), encoding='utf-8')
         train_stats = train_one_epoch(args, model, data_loader_train, optimizer, device, epoch,
-                                      epoch * num_training_steps_per_epoch, args.clip_max_norm)
+                                      epoch * num_training_steps_per_epoch, args.clip_max_norm, scaler=scaler)
         lr_scheduler.step()
-        val_stats = validate(args, model, data_loader_val, device)
+        prediction_path = (str(Path(args.output_dir, 'predictions_val_epoch_%03d.jsonl' % epoch))
+                           if args.export_val_predictions and args.output_dir else None)
+        val_stats = validate(args, model, data_loader_val, device, prediction_path=prediction_path)
         log_stats = {'epoch': epoch,
                      **{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'validation_{k}': v for k, v in val_stats.items()},
@@ -378,6 +435,7 @@ def main(args):
                     'model': model_without_ddp.state_dict(),
                     'optimizer': optimizer.state_dict(),
                     'lr_scheduler': lr_scheduler.state_dict(),
+                    'scaler': scaler.state_dict(),
                     'epoch': epoch,
                     'args': args,
                     'val_accu': val_stats['accu']

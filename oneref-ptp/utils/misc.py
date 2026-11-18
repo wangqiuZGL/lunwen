@@ -20,7 +20,9 @@ import argparse
 
 # needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
-if 0.7 > float(torchvision.__version__[:3]) > 0.1:
+# Compare numeric components: 0.20 must not be interpreted as float(0.2).
+_torchvision_version = tuple(int(v) for v in torchvision.__version__.split('+')[0].split('.')[:2])
+if (0, 1) < _torchvision_version < (0, 7):
     from torchvision.ops import _new_empty_tensor
     from torchvision.ops.misc import _output_size
 

@@ -14,17 +14,23 @@ from typing import Iterable
 import utils.misc as utils
 import utils.loss_utils as loss_utils
 import utils.eval_utils as eval_utils
+from utils.training_runtime import backward_and_step
+from utils.pair_supervision import pair_ranking_loss
 from utils.box_utils import xywh2xyxy
 
 
 def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
                     optimizer: torch.optim.Optimizer, device: torch.device,
-                    epoch: int, start_steps: int, max_norm: float = 0):
+                    epoch: int, start_steps: int, max_norm: float = 0, scaler=None):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
+    amp_enabled = getattr(args, 'amp', False) and device.type == 'cuda'
+    scaler = scaler if scaler is not None else torch.cuda.amp.GradScaler(enabled=amp_enabled)
+    optimizer.zero_grad(set_to_none=True)
+    pair_totals = dict(candidates=0, comparisons=0, gap_sum=0.)
 
     # for batch in metric_logger.log_every(data_loader, print_freq, header):
     for data_iter_step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
@@ -47,14 +53,27 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
         # text_data = text_data.to(device)
 
         # model forward
-        pred_box, contrastive_loss, visu_sim, seg_mask, mlm_loss, mlm_acc, mlm_sts_pred, mim_pred, mim_vts_pred, ptp_grid_logits = \
-            model(img_data.tensors, img_data.mask, text_data, global_step=global_step, training=True)
+        with torch.cuda.amp.autocast(enabled=amp_enabled):
+            pred_box, contrastive_loss, visu_sim, seg_mask, mlm_loss, mlm_acc, mlm_sts_pred, mim_pred, mim_vts_pred, ptp_grid_logits = \
+                model(img_data.tensors, img_data.mask, text_data, global_step=global_step, training=True)
         loss_dict = loss_utils.one_ref_loss(args, pred_box, target, obj_mask, contrastive_loss, visu_sim, seg_mask,
                                             mlm_loss=mlm_loss,
                                             ptp_grid_logits=ptp_grid_logits,
                                             ptp_grid_labels=grid_label)
         if getattr(args, "enable_ptp_aux", False) and "loss_ptp" not in loss_dict:
             raise RuntimeError("PTP is enabled but loss_ptp was not produced")
+
+        if getattr(args, 'enable_pair_sampling', False):
+            if len(batch) != 5 or not isinstance(batch[4], dict) or 'pairs' not in batch[4]:
+                raise ValueError('Pair sampling requires paired_collate metadata')
+            pair_loss, pair_stats = pair_ranking_loss(
+                visu_sim, obj_mask, img_data.mask, batch[4]['pairs'],
+                margin=args.pair_margin, min_patches=args.pair_min_patches)
+            loss_dict['loss_pair'] = pair_loss * args.pair_loss_weight
+            metric_logger.update(pair_loss_raw=float(pair_loss.detach()), **pair_stats)
+            pair_totals['candidates'] += pair_stats['pair_candidate_pairs']
+            pair_totals['comparisons'] += pair_stats['pair_valid_comparisons']
+            pair_totals['gap_sum'] += pair_stats['pair_score_gap'] * pair_stats['pair_valid_comparisons']
 
         losses = sum(value for key, value in loss_dict.items() if key.startswith("loss_"))
 
@@ -72,18 +91,21 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
             print(loss_dict_reduced)
             sys.exit(1)
 
-        optimizer.zero_grad()
-        losses.backward()
-        if max_norm > 0:  # The default value of max_norm is 0.
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
-        optimizer.step()
+        backward_and_step(losses, model, optimizer, scaler, data_iter_step,
+                          len(data_loader), args.update_freq, max_norm)
 
         metric_logger.update(loss=loss_value, **loss_dict_reduced_unscaled)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger)
-    return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+    stats = {k: float(meter.global_avg) for k, meter in metric_logger.meters.items()}
+    if getattr(args, 'enable_pair_sampling', False):
+        stats.update(pair_candidate_pairs_total=pair_totals['candidates'],
+                     pair_valid_comparisons_total=pair_totals['comparisons'],
+                     pair_valid_fraction=pair_totals['comparisons'] / max(1, 2 * pair_totals['candidates']),
+                     pair_score_gap_valid_mean=pair_totals['gap_sum'] / max(1, pair_totals['comparisons']))
+    return stats
 
 
 """
@@ -182,11 +204,12 @@ def train_one_epoch_with_mrefm(args, model: torch.nn.Module, vqkd: torch.nn.Modu
 
 
 @torch.no_grad()
-def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.device):
+def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.device, prediction_path=None):
     model.eval()
 
     metric_logger = utils.MetricLogger(delimiter="  ")
     header = 'Eval:'
+    prediction_records = []
 
     for batch in metric_logger.log_every(data_loader, 10, header):
         img_data, text_data, target, tgt_mask = batch[:4]
@@ -199,8 +222,18 @@ def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
         # text_data = text_data.to(device)
 
         # 模型推理时返回5个值：pred_box, seg_mask, vision_cls, language_cls, ptp_grid_logits(None)
-        pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
+        with torch.cuda.amp.autocast(enabled=getattr(args, 'amp', False) and device.type == 'cuda'):
+            pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
         miou, accu, mask_iou_list, I_list, U_list = eval_utils.trans_vg_eval_val(args, pred_box, target, seg_mask, tgt_mask)
+        if prediction_path:
+            if len(batch) != 5 or not isinstance(batch[4], dict) or 'samples' not in batch[4]:
+                raise ValueError('Prediction export requires indexed_collate metadata')
+            for index, metadata in enumerate(batch[4]['samples']):
+                prediction_records.append(dict(
+                    **metadata, pred_box_cxcywh=pred_box[index].float().cpu().tolist(),
+                    target_box_cxcywh=target[index].float().cpu().tolist(),
+                    coordinate_frame='normalized_padded_input',
+                    iou=float(miou[index]), hit_at_0_5=bool(miou[index] >= .5)))
 
         metric_logger.update_v2('box_miou', torch.mean(miou), batch_size)
         metric_logger.update_v2('box_accu', accu, batch_size)
@@ -214,7 +247,10 @@ def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
-    stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+    stats = {k: float(meter.global_avg) for k, meter in metric_logger.meters.items()}
+    if prediction_path:
+        from utils.prediction_records import write_predictions
+        write_predictions(prediction_path, prediction_records)
     return stats
 
 

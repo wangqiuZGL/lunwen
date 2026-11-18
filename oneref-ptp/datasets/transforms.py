@@ -183,6 +183,10 @@ class RandomResize(object):
 
         input_dict['img'] = resized_img
         input_dict['box'] = resized_box
+        if 'pair_boxes' in input_dict:
+            # Match the exact scale used by the existing box transformation.
+            side = max(img.size) if self.with_long_side else min(img.size)
+            input_dict['pair_boxes'] = input_dict['pair_boxes'] * (size / float(side))
 
         new_img_size = (resized_img.height, resized_img.width)
 
@@ -212,12 +216,25 @@ class RandomSizeCrop(object):
             w = random.randint(self.min_size, min(img.width, self.max_size))
             h = random.randint(self.min_size, min(img.height, self.max_size))
             region = T.RandomCrop.get_params(img, [h, w])  # [i, j, target_w, target_h]
+            pair_boxes = None
+            if 'pair_boxes' in input_dict:
+                i, j, crop_h, crop_w = region
+                original = input_dict['pair_boxes']
+                pair_boxes = original - original.new_tensor([j, i, j, i])
+                pair_boxes = torch.minimum(pair_boxes.reshape(-1, 2, 2),
+                                           original.new_tensor([crop_w, crop_h])).clamp(min=0).reshape(-1, 4)
+                original_area = (original[:, 2:] - original[:, :2]).prod(1)
+                remaining_area = (pair_boxes[:, 2:] - pair_boxes[:, :2]).prod(1)
+                if (remaining_area < original_area * 0.5).any() or (remaining_area <= 0).any():
+                    continue
             box_xywh = xyxy2xywh(box)
             box_x, box_y = box_xywh[0], box_xywh[1]
             if box_x > region[0] and box_y > region[1]:
                 img, box, obj_mask = crop(img, box, region, obj_mask)
                 input_dict['img'] = img
                 input_dict['box'] = box
+                if pair_boxes is not None:
+                    input_dict['pair_boxes'] = pair_boxes
                 if obj_mask is not None:
                     input_dict['obj_mask'] = obj_mask
 
@@ -298,7 +315,7 @@ class NormalizeAndPad(object):
         input_dict['mask'] = out_mask
 
         if 'obj_mask' in input_dict.keys():
-            obj_mask = torch.zeros((1, self.size, self.size)).float()
+            obj_mask = torch.zeros((input_dict['obj_mask'].shape[0], self.size, self.size)).float()
             obj_mask[:, top:top+h, left:left+w] = input_dict['obj_mask']
             input_dict['obj_mask'] = obj_mask
 
@@ -310,6 +327,12 @@ class NormalizeAndPad(object):
             box = xyxy2xywh(box)
             box = box / torch.tensor([w, h, w, h], dtype=torch.float32)
             input_dict['box'] = box
+
+        if 'pair_boxes' in input_dict:
+            boxes = input_dict['pair_boxes'] + input_dict['pair_boxes'].new_tensor([left, top, left, top])
+            centers = (boxes[:, :2] + boxes[:, 2:]) / 2
+            sizes = boxes[:, 2:] - boxes[:, :2]
+            input_dict['pair_boxes'] = torch.cat((centers, sizes), dim=1) / self.size
 
         return input_dict
 
