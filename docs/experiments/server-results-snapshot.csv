@@ -1,0 +1,4 @@
+﻿run_id,snapshot_utc,logged_finetune_epochs,expected_finetune_epochs,best_epoch,val_acc_at_0_5,val_miou_at_same_epoch,is_final,log_path
+baseline_train_20261118,2026-11-18T14:58:12.098549+00:00,8,8,7,0.7339654564857483,0.6223074197769165,True,docs/experiments/training-logs/baseline_train_20261118/finetune/log.txt
+fused_train_20261118_1458,2026-11-18T14:58:12.098549+00:00,8,8,7,0.7321063876152039,0.6208484172821045,True,docs/experiments/training-logs/fused_train_20261118_1458/finetune/log.txt
+sadb_only_train_20261118,2026-11-18T14:58:12.098549+00:00,6,8,5,0.7132366895675659,0.5996982455253601,False,docs/experiments/training-logs/sadb_only_train_20261118/finetune/log.txt

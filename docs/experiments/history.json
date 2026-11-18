@@ -2,52 +2,108 @@
   "record_date": "2026-11-18",
   "metric_units": "fractions in JSON; percentages in README; deltas in percentage points",
   "source": {
-    "kind": "prior_chat_completion_reports",
+    "kind": "downloaded_server_log_txt",
     "thread_id": "01a1d405-cbc0-7a80-97f4-08aaf443d8db",
-    "raw_server_logs_downloaded_this_session": false,
-    "note": "SSH public-key login failed; historical values are transcribed, not newly measured."
+    "raw_server_logs_downloaded_this_session": true,
+    "note": "Recovered prior authorized SSH credentials from earlier chat; downloaded read-only source and log snapshot; verified source hashes. SADB run is incomplete in this snapshot.",
+    "snapshot_utc": "2026-11-18T14:58:12.098549+00:00"
   },
   "shared_config": {
-    "dataset": "RefCOCO+", "train_fraction_by_image": 0.2,
-    "subset_seed": 42, "training_seed": 42, "validation": "full official val",
-    "model": "beit3_base_patch16_384", "warmup_epochs": 2, "finetune_epochs": 8,
-    "image_size": 384, "max_query_len": 64, "amp": true,
-    "warmup_batch": 8, "warmup_accumulation": 4,
-    "warmup_lr": 0.00025, "finetune_lr": 0.00003
+    "dataset": "RefCOCO+",
+    "train_fraction_by_image": 0.2,
+    "subset_seed": 42,
+    "training_seed": 42,
+    "validation": "full official val",
+    "model": "beit3_base_patch16_384",
+    "warmup_epochs": 2,
+    "finetune_epochs": 8,
+    "image_size": 384,
+    "max_query_len": 64,
+    "amp": true,
+    "warmup_batch": 8,
+    "warmup_accumulation": 4,
+    "warmup_lr": 0.00025,
+    "finetune_lr": 3e-05
   },
   "runs": [
     {
-      "name": "baseline_train_20261118", "status": "historically_reported_complete",
-      "sadb": false, "tcgs": false,
-      "val_acc_at_0_5": 0.7340, "reported_val_mean_iou": 0.6223,
-      "finetune_batch": 16, "finetune_accumulation": 2,
+      "name": "baseline_train_20261118",
+      "status": "log_verified_complete",
+      "sadb": false,
+      "tcgs": false,
+      "val_acc_at_0_5": 0.7339654564857483,
+      "reported_val_mean_iou": 0.6223,
+      "finetune_batch": 16,
+      "finetune_accumulation": 2,
       "server_directory": "/hy-tmp/lunwen-runs/baseline_train_20261118",
-      "testA": null, "testB": null
+      "testA": null,
+      "testB": null,
+      "val_mean_iou_at_best_acc": 0.6223074197769165,
+      "best_epoch": 7,
+      "logged_finetune_epochs": 8,
+      "expected_finetune_epochs": 8,
+      "is_final": true,
+      "raw_log": "docs/experiments/training-logs/baseline_train_20261118/finetune/log.txt"
     },
     {
-      "name": "fused_train_20261118", "status": "historically_reported_complete",
-      "sadb": true, "syntax_lambda": 0.1, "tcgs": true,
-      "tcgs_grid_size": 16, "tcgs_weight": 0.1,
-      "val_acc_at_0_5": 0.7321, "reported_val_mean_iou": 0.6208,
+      "name": "fused_train_20261118",
+      "status": "log_verified_complete",
+      "sadb": true,
+      "syntax_lambda": 0.1,
+      "tcgs": true,
+      "tcgs_grid_size": 16,
+      "tcgs_weight": 0.1,
+      "val_acc_at_0_5": 0.7321063876152039,
+      "reported_val_mean_iou": 0.6208,
       "acc_delta_percentage_points_vs_baseline": -0.19,
       "miou_delta_percentage_points_vs_baseline": -0.15,
-      "limitations": ["single seed", "20% training images", "first two finetuning epochs batch8/accum4, then batch16/accum2", "resumed during training", "metric epoch alignment not reverified"],
+      "limitations": [
+        "single seed",
+        "20% training images",
+        "first two finetuning epochs batch8/accum4, then batch16/accum2",
+        "resumed during training"
+      ],
       "historical_tcgs_training_accuracy_approx": 0.016,
-      "backup_paths_reported": ["oss://datasets/experiments/fused_train_20261118_1458.tar", "oss://datasets/experiments/fused_train_20261118_1458_records.zip"],
-      "testA": null, "testB": null
+      "backup_paths_reported": [
+        "oss://datasets/experiments/fused_train_20261118_1458.tar",
+        "oss://datasets/experiments/fused_train_20261118_1458_records.zip"
+      ],
+      "testA": null,
+      "testB": null,
+      "val_mean_iou_at_best_acc": 0.6208484172821045,
+      "best_epoch": 7,
+      "logged_finetune_epochs": 8,
+      "expected_finetune_epochs": 8,
+      "is_final": true,
+      "raw_log": "docs/experiments/training-logs/fused_train_20261118_1458/finetune/log.txt"
     },
     {
-      "name": "sadb_only_train_20261118", "status": "started_previously_final_result_unverified",
-      "sadb": true, "syntax_lambda": 0.1, "tcgs": false,
-      "finetune_batch": 16, "finetune_accumulation": 2,
+      "name": "sadb_only_train_20261118",
+      "status": "log_verified_in_progress",
+      "sadb": true,
+      "syntax_lambda": 0.1,
+      "tcgs": false,
+      "finetune_batch": 16,
+      "finetune_accumulation": 2,
       "server_directory": "/hy-tmp/lunwen-runs/sadb_only_train_20261118",
-      "val_acc_at_0_5": null, "reported_val_mean_iou": null,
-      "testA": null, "testB": null
+      "val_acc_at_0_5": 0.7132366895675659,
+      "reported_val_mean_iou": null,
+      "testA": null,
+      "testB": null,
+      "val_mean_iou_at_best_acc": 0.5996982455253601,
+      "best_epoch": 5,
+      "logged_finetune_epochs": 6,
+      "expected_finetune_epochs": 8,
+      "is_final": false,
+      "raw_log": "docs/experiments/training-logs/sadb_only_train_20261118/finetune/log.txt"
     },
     {
-      "name": "paired_instance_supervision", "status": "implemented_not_trained",
-      "val_acc_at_0_5": null, "reported_val_mean_iou": null,
-      "testA": null, "testB": null
+      "name": "paired_instance_supervision",
+      "status": "implemented_not_trained",
+      "val_acc_at_0_5": null,
+      "reported_val_mean_iou": null,
+      "testA": null,
+      "testB": null
     }
   ]
 }

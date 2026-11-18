@@ -30,7 +30,7 @@ COMMON=(--num_workers "${NUM_WORKERS:-4}" --lr_scheduler cosine \
   --seed 42 --amp)
 INITIAL="$ASSETS/beit3_checkpoints/beit3_base_indomain_patch16_224.pth"
 if [[ "$MODE" == smoke ]]; then
-  echo "Use train mode for baseline; fused-only smoke assertions are inapplicable." >&2; exit 2
+  echo 'Use train mode for baseline; fused-only smoke assertions are inapplicable.' >&2; exit 2
   python scripts/smoke_fused.py "${COMMON[@]}" --epochs 1 --batch_size "${BATCH_SIZE:-2}" \
     --update_freq "${UPDATE_FREQ:-2}" --lr 0.00003 --use_box_mask_constraints \
     --limit_train_samples "${SMOKE_SAMPLES:-8}" --limit_val_samples 16 \

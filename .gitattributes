@@ -1,2 +1,4 @@
 # Training launchers must retain LF when checked out on Windows or Linux.
 *.sh text eol=lf
+# Preserve archived server log bytes so SHA256 provenance survives checkout.
+docs/experiments/training-logs/** -text
