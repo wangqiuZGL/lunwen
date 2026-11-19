@@ -15,7 +15,7 @@ import utils.misc as utils
 import utils.loss_utils as loss_utils
 import utils.eval_utils as eval_utils
 from utils.training_runtime import backward_and_step
-from utils.pair_supervision import pair_ranking_loss
+from utils.pair_supervision import pair_ranking_loss, query_competition_loss
 from utils.box_utils import xywh2xyxy
 
 
@@ -30,7 +30,7 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
     amp_enabled = getattr(args, 'amp', False) and device.type == 'cuda'
     scaler = scaler if scaler is not None else torch.cuda.amp.GradScaler(enabled=amp_enabled)
     optimizer.zero_grad(set_to_none=True)
-    pair_totals = dict(candidates=0, comparisons=0, gap_sum=0.)
+    pair_totals = dict(candidates=0, comparisons=0, gap_sum=0., query_accuracy_sum=0.)
 
     # for batch in metric_logger.log_every(data_loader, print_freq, header):
     for data_iter_step, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
@@ -66,14 +66,20 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
         if getattr(args, 'enable_pair_sampling', False):
             if len(batch) != 5 or not isinstance(batch[4], dict) or 'pairs' not in batch[4]:
                 raise ValueError('Pair sampling requires paired_collate metadata')
-            pair_loss, pair_stats = pair_ranking_loss(
-                visu_sim, obj_mask, img_data.mask, batch[4]['pairs'],
-                margin=args.pair_margin, min_patches=args.pair_min_patches)
+            if getattr(args, 'pair_loss_type', 'ranking') == 'query_competition':
+                pair_loss, pair_stats = query_competition_loss(
+                    visu_sim, obj_mask, img_data.mask, batch[4]['pairs'],
+                    temperature=args.pair_temperature, min_patches=args.pair_min_patches)
+            else:
+                pair_loss, pair_stats = pair_ranking_loss(
+                    visu_sim, obj_mask, img_data.mask, batch[4]['pairs'],
+                    margin=args.pair_margin, min_patches=args.pair_min_patches)
             loss_dict['loss_pair'] = pair_loss * args.pair_loss_weight
             metric_logger.update(pair_loss_raw=float(pair_loss.detach()), **pair_stats)
             pair_totals['candidates'] += pair_stats['pair_candidate_pairs']
             pair_totals['comparisons'] += pair_stats['pair_valid_comparisons']
             pair_totals['gap_sum'] += pair_stats['pair_score_gap'] * pair_stats['pair_valid_comparisons']
+            pair_totals['query_accuracy_sum'] += pair_stats.get('pair_query_accuracy', 0.) * pair_stats['pair_valid_comparisons']
 
         losses = sum(value for key, value in loss_dict.items() if key.startswith("loss_"))
 
@@ -105,6 +111,8 @@ def train_one_epoch(args, model: torch.nn.Module, data_loader: Iterable,
                      pair_valid_comparisons_total=pair_totals['comparisons'],
                      pair_valid_fraction=pair_totals['comparisons'] / max(1, 2 * pair_totals['candidates']),
                      pair_score_gap_valid_mean=pair_totals['gap_sum'] / max(1, pair_totals['comparisons']))
+        if getattr(args, 'pair_loss_type', 'ranking') == 'query_competition':
+            stats['pair_query_accuracy_valid_mean'] = pair_totals['query_accuracy_sum'] / max(1, pair_totals['comparisons'])
     return stats
 
 

@@ -10,6 +10,11 @@ import torch.nn.functional as F
 
 
 def validate_pair_config(args):
+    temperature = getattr(args, 'pair_temperature', .1)
+    if not math.isfinite(temperature) or temperature <= 0:
+        raise ValueError('pair_temperature must be finite and positive')
+    if getattr(args, 'pair_loss_type', 'ranking') not in ('ranking', 'query_competition'):
+        raise ValueError('Unknown pair_loss_type')
     enabled = getattr(args, 'enable_pair_sampling', False)
     weight = getattr(args, 'pair_loss_weight', 0.)
     if not math.isfinite(weight) or weight < 0:
@@ -184,3 +189,45 @@ def pair_ranking_loss(scores, masks, padding, pairs, margin=0.1, min_patches=1):
     stats = dict(pair_valid_comparisons=len(values), pair_candidate_pairs=len(pairs),
                  pair_score_gap=float(torch.stack(gaps).mean()) if gaps else 0.)
     return loss, stats
+
+
+def query_competition_loss(scores, masks, padding, pairs, temperature=.1, min_patches=1):
+    """Compare two queries per aligned patch, with equal weight per target.
+
+    Candidate boxes do not establish category identity. This loss assumes that
+    the caller has paired different annotated targets in the same image and
+    applied identical spatial transforms. Shared pixels, shared coarse patches
+    and patches touching padding are ignored. There is no background label.
+    """
+    if not math.isfinite(temperature) or temperature <= 0 or min_patches < 1:
+        raise ValueError('positive finite temperature and min_patches >= 1 required')
+    grid = math.isqrt(scores.shape[-1])
+    if grid * grid != scores.shape[-1]:
+        raise ValueError('scores must have a square patch grid')
+    values, gaps, accuracies = [], [], []
+    masks, padding = masks[:, 0].bool(), padding.bool()
+    for a, b in pairs:
+        valid_pixels = ~(padding[a] | padding[b])
+        regions = [masks[a] & ~masks[b] & valid_pixels,
+                   masks[b] & ~masks[a] & valid_pixels]
+        valid_patches = F.adaptive_max_pool2d((~valid_pixels).float()[None, None],
+                                             (grid, grid)).flatten() == 0
+        weights = [F.adaptive_avg_pool2d(r.float()[None, None], (grid, grid)).flatten()
+                   * valid_patches for r in regions]
+        shared = (weights[0] > 0) & (weights[1] > 0)
+        weights = [w.masked_fill(shared, 0) for w in weights]
+        if any(int((w > 0).sum()) < min_patches for w in weights):
+            continue
+        wa, wb = [w / w.sum() for w in weights]
+        delta = (scores[a].float() - scores[b].float()) / temperature
+        values.extend([(F.softplus(-delta) * wa).sum(),
+                       (F.softplus(delta) * wb).sum()])
+        gaps.extend([(scores[a].float() * (wa - wb)).sum().detach(),
+                     (scores[b].float() * (wb - wa)).sum().detach()])
+        # Strict sign: ties are not successful discrimination for either query.
+        accuracies.extend([((delta.detach() > 0).float() * wa).sum(),
+                           ((delta.detach() < 0).float() * wb).sum()])
+    loss = torch.stack(values).mean() if values else scores.float().sum() * 0.
+    return loss, dict(pair_valid_comparisons=len(values), pair_candidate_pairs=len(pairs),
+                      pair_score_gap=float(torch.stack(gaps).mean()) if gaps else 0.,
+                      pair_query_accuracy=float(torch.stack(accuracies).mean()) if accuracies else 0.)

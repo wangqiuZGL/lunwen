@@ -20,7 +20,7 @@ class Model(torch.nn.Module):
 
 
 class PairTrainingTest(unittest.TestCase):
-    def run_step(self, weight):
+    def run_step(self, weight, loss_type='ranking'):
         model = Model()
         optimizer = torch.optim.SGD(model.parameters(), lr=.1)
         image = SimpleNamespace(tensors=torch.zeros(2, 3, 2, 2), mask=torch.zeros(2, 2, 2))
@@ -30,6 +30,7 @@ class PairTrainingTest(unittest.TestCase):
                  masks, {'pairs': [(0, 1)]})
         args = SimpleNamespace(amp=False, update_freq=1, enable_pair_sampling=True,
                                pair_loss_weight=weight, pair_margin=.1, pair_min_patches=1,
+                               pair_loss_type=loss_type, pair_temperature=.1,
                                use_regress_box=True, use_contrastive_loss=False,
                                use_box_mask_constraints=False, enable_dynamic_mim=False,
                                use_mask_loss=False, enable_ref_mim=False, enable_ref_mlm=False,
@@ -48,6 +49,14 @@ class PairTrainingTest(unittest.TestCase):
 
     def test_sampling_only_zero_weight_has_no_ranking_gradient(self):
         before, after, stats = self.run_step(0.)
+        torch.testing.assert_close(before, after)
+        self.assertEqual(stats['loss_pair'], 0.)
+
+    def test_query_competition_dispatch_and_zero_weight(self):
+        before, after, stats = self.run_step(.1, 'query_competition')
+        self.assertGreater(after[0, 0], before[0, 0])
+        self.assertIn('pair_query_accuracy_valid_mean', stats)
+        before, after, stats = self.run_step(0., 'query_competition')
         torch.testing.assert_close(before, after)
         self.assertEqual(stats['loss_pair'], 0.)
 

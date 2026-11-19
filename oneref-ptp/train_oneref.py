@@ -13,6 +13,7 @@ import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader, DistributedSampler
 
 import utils.misc as utils
+from utils.oss_backup import atomic_save, AsyncCheckpointBackup
 # from models import build_model
 from datasets import build_dataset
 from engine import train_one_epoch, train_one_epoch_with_mrefm, validate
@@ -111,11 +112,14 @@ def get_args_parser():
     parser.add_argument('--enable_pair_sampling', action='store_true')
     parser.add_argument('--pair_loss_weight', type=float, default=0.0)
     parser.add_argument('--pair_margin', type=float, default=0.1)
+    parser.add_argument('--pair_loss_type', choices=['ranking', 'query_competition'], default='ranking')
+    parser.add_argument('--pair_temperature', type=float, default=0.1)
     parser.add_argument('--pair_fraction', type=float, default=0.5,
                         help='Maximum fraction of sample slots allocated to pairs')
     parser.add_argument('--pair_max_iou', type=float, default=0.5)
     parser.add_argument('--pair_min_patches', type=int, default=1)
     parser.add_argument('--export_val_predictions', action='store_true')
+    parser.add_argument('--oss_backup_prefix', default='', help='Optional OSS stage prefix; archives latest and best checkpoints after each epoch')
 
     # mim pretraining
     # cls-pretraining settings
@@ -392,6 +396,11 @@ def main(args):
             f.write(str(args) + "\n")
 
     print("Start training...")
+    backup = None
+    if args.oss_backup_prefix and utils.is_main_process():
+        if not args.output_dir:
+            raise ValueError('OSS backup requires output_dir')
+        backup = AsyncCheckpointBackup(args.output_dir, args.oss_backup_prefix)
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
         start_ep_time = time.time()
@@ -431,22 +440,27 @@ def main(args):
 
             for checkpoint_path in checkpoint_paths:
                 print('Checkpoint is saving to: ', str(checkpoint_path))
-                utils.save_on_master({
-                    'model': model_without_ddp.state_dict(),
-                    'optimizer': optimizer.state_dict(),
-                    'lr_scheduler': lr_scheduler.state_dict(),
-                    'scaler': scaler.state_dict(),
-                    'epoch': epoch,
-                    'args': args,
-                    'val_accu': val_stats['accu']
-                }, checkpoint_path)
+                if utils.is_main_process():
+                    atomic_save({
+                        'model': model_without_ddp.state_dict(),
+                        'optimizer': optimizer.state_dict(),
+                        'lr_scheduler': lr_scheduler.state_dict(),
+                        'scaler': scaler.state_dict(),
+                        'epoch': epoch,
+                        'args': args,
+                        'val_accu': val_stats['accu']
+                    }, checkpoint_path)
 
         end_ep_time = time.time()
         total_time = end_ep_time - start_ep_time
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
         print('Current epoch training time {}'.format(total_time_str))
         print('Checkpoints have been saved!')
+        if backup is not None:
+            backup.submit(epoch)
 
+    if backup is not None:
+        backup.close()
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Total training time {}'.format(total_time_str))
