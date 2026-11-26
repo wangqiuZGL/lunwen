@@ -1,0 +1,35 @@
+{
+  "files": {
+    "combined-pipeline.log": {
+      "durations": [
+        "0:00:06",
+        "1:31:58"
+      ],
+      "hours": 1.5344444444444445
+    },
+    "ablation-queue.log": {
+      "durations": [
+        "0:00:06",
+        "1:30:36",
+        "0:00:06"
+      ],
+      "hours": 1.5133333333333334
+    },
+    "syntax-long-console.log": {
+      "durations": [
+        "0:00:06",
+        "0:59:56",
+        "3:43:11",
+        "4:37:03"
+      ],
+      "hours": 9.337777777777777
+    },
+    "plain-long-console.log": {
+      "durations": [
+        "3:40:20"
+      ],
+      "hours": 3.672222222222222
+    }
+  },
+  "verified_hours": 16.057777777777776
+}

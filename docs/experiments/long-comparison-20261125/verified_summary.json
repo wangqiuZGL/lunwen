@@ -1,0 +1,42 @@
+{
+  "paired_control": {
+    "completed_epochs": 20,
+    "best_epoch": 18,
+    "acc": 74.80944395065308,
+    "miou": 64.64466452598572,
+    "initialization_sha256": "4d15e8017491a72eba4c7d3f878a726d32e4f4d598622449dca99ccfb9a93b69",
+    "oss_backup": {
+      "success": true,
+      "destination": "oss://datasets/experiments/syntax_local_20pct_20261124/control/finetune/checkpoints.tar",
+      "bytes": 5472604160,
+      "sha256": "60c3b9eccf4ac144f4b1e44f25528c3f512aa2f511d83fcb3d48947c63c8b998"
+    }
+  },
+  "fusion": {
+    "completed_epochs": 20,
+    "best_epoch": 20,
+    "acc": 75.04183053970337,
+    "miou": 65.10244607925415,
+    "initialization_sha256": "4d15e8017491a72eba4c7d3f878a726d32e4f4d598622449dca99ccfb9a93b69",
+    "oss_backup": {
+      "success": true,
+      "destination": "oss://datasets/experiments/syntax_local_20pct_20261124/fusion/finetune/checkpoints.tar",
+      "bytes": 5472604160,
+      "sha256": "97878392671b9a07474bcbba28641aaff6a86c2d645a6684c7da7ece1a47a102"
+    }
+  },
+  "plain": {
+    "completed_epochs": 20,
+    "best_epoch": 18,
+    "acc": 75.2649188041687,
+    "miou": 64.9632215499878,
+    "initialization_sha256": "4d15e8017491a72eba4c7d3f878a726d32e4f4d598622449dca99ccfb9a93b69",
+    "oss_backup": {
+      "success": true,
+      "destination": "oss://datasets/experiments/plain_oneref20pct_long_20261124/finetune/checkpoints.tar",
+      "bytes": 5469102080,
+      "sha256": "6559b58db29b5bb99f7364f97377d7e680d6363b290bc81683d73e8f26486c30"
+    }
+  },
+  "comparison_note": "Best validation accuracy selects each checkpoint; single seed; same common 10-epoch frozen initialization. Plain has ordinary sampling; others use paired sampling."
+}

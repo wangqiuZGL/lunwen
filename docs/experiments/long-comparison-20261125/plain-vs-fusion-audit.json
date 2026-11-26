@@ -1,0 +1,75 @@
+{
+  "n": 10758,
+  "images": 1500,
+  "evaluator_reconstruction": [
+    {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    },
+    {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    }
+  ],
+  "reference_accuracy": 75.2649191299498,
+  "candidate_accuracy": 75.04182933630787,
+  "delta_pp": -0.2230897936419409,
+  "corrected": 764,
+  "regressed": 788,
+  "image_bootstrap_delta_95ci_pp": [
+    -0.9925710317311742,
+    0.5563852079672353
+  ],
+  "training_seed_count": 1,
+  "exploratory": true,
+  "uncertainty_scope": "validation image sampling, not training-seed variability",
+  "strata": {
+    "padded_area_1to10pct": {
+      "n": 4792,
+      "reference_accuracy": 67.779632721202,
+      "candidate_accuracy": 66.98664440734558,
+      "delta_pp": -0.7929883138564273
+    },
+    "words_le3": {
+      "n": 6105,
+      "reference_accuracy": 81.47420147420148,
+      "candidate_accuracy": 81.1957411957412,
+      "delta_pp": -0.27846027846027843
+    },
+    "padded_area_ge_10pct": {
+      "n": 5966,
+      "reference_accuracy": 81.27723768018772,
+      "candidate_accuracy": 81.51190077103587,
+      "delta_pp": 0.23466309084813944
+    },
+    "words_4to8": {
+      "n": 4316,
+      "reference_accuracy": 68.07228915662651,
+      "candidate_accuracy": 67.44670991658943,
+      "delta_pp": -0.6255792400370713
+    },
+    "words_gt8": {
+      "n": 337,
+      "reference_accuracy": 54.89614243323442,
+      "candidate_accuracy": 60.83086053412463,
+      "delta_pp": 5.934718100890208
+    }
+  },
+  "other_annotated_target_confusion_proxy": {
+    "reference": 1312,
+    "candidate": 1409,
+    "limitation": "incomplete target inventory; not verified same-category mistakes"
+  },
+  "geometric_pair_diagnostic": {
+    "description_pairs": 29564,
+    "both_correct_pct": [
+      52.79055608172101,
+      52.58760654850494
+    ],
+    "overlapping_predictions_pct": [
+      12.904207820322014,
+      13.157894736842104
+    ],
+    "limitation": "correlated expression pairs, unverified semantic exclusivity; descriptive only"
+  }
+}

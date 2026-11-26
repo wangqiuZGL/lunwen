@@ -1,0 +1,75 @@
+{
+  "n": 10758,
+  "images": 1500,
+  "evaluator_reconstruction": [
+    {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    },
+    {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    }
+  ],
+  "reference_accuracy": 75.2649191299498,
+  "candidate_accuracy": 74.80944413459751,
+  "delta_pp": -0.45547499535229596,
+  "corrected": 711,
+  "regressed": 760,
+  "image_bootstrap_delta_95ci_pp": [
+    -1.1810014209683903,
+    0.28808162067100623
+  ],
+  "training_seed_count": 1,
+  "exploratory": true,
+  "uncertainty_scope": "validation image sampling, not training-seed variability",
+  "strata": {
+    "padded_area_1to10pct": {
+      "n": 4792,
+      "reference_accuracy": 67.779632721202,
+      "candidate_accuracy": 66.48580968280467,
+      "delta_pp": -1.2938230383973288
+    },
+    "words_le3": {
+      "n": 6105,
+      "reference_accuracy": 81.47420147420148,
+      "candidate_accuracy": 81.44144144144144,
+      "delta_pp": -0.03276003276003276
+    },
+    "padded_area_ge_10pct": {
+      "n": 5966,
+      "reference_accuracy": 81.27723768018772,
+      "candidate_accuracy": 81.49513912168958,
+      "delta_pp": 0.2179014415018438
+    },
+    "words_4to8": {
+      "n": 4316,
+      "reference_accuracy": 68.07228915662651,
+      "candidate_accuracy": 66.86746987951807,
+      "delta_pp": -1.2048192771084338
+    },
+    "words_gt8": {
+      "n": 337,
+      "reference_accuracy": 54.89614243323442,
+      "candidate_accuracy": 56.37982195845698,
+      "delta_pp": 1.483679525222552
+    }
+  },
+  "other_annotated_target_confusion_proxy": {
+    "reference": 1312,
+    "candidate": 1435,
+    "limitation": "incomplete target inventory; not verified same-category mistakes"
+  },
+  "geometric_pair_diagnostic": {
+    "description_pairs": 29564,
+    "both_correct_pct": [
+      52.79055608172101,
+      51.95169801109457
+    ],
+    "overlapping_predictions_pct": [
+      12.904207820322014,
+      13.780273305371399
+    ],
+    "limitation": "correlated expression pairs, unverified semantic exclusivity; descriptive only"
+  }
+}

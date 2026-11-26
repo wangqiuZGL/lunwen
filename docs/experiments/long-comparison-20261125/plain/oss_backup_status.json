@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "destination": "oss://datasets/experiments/plain_oneref20pct_long_20261124/finetune/checkpoints.tar",
+  "bytes": 5469102080,
+  "sha256": "6559b58db29b5bb99f7364f97377d7e680d6363b290bc81683d73e8f26486c30"
+}

@@ -1,0 +1,3 @@
+group,completed_epochs,best_epoch,acc_percent,miou_percent,weight
+control,8,8,73.3407735824585,62.24403381347656,0
+treatment,8,8,73.88920187950134,62.71787881851196,0.1

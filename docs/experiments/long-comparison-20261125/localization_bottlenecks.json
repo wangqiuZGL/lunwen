@@ -1,0 +1,169 @@
+{
+  "scope": "Exploratory single-seed, previously inspected validation data; descriptive, not causal.",
+  "limitations": [
+    "Padded area is confounded by image aspect ratio and differs from COCO small/medium/large.",
+    "Center-inside and IoU intervals do not identify semantic error causes.",
+    "Multiple expressions of one image or instance are correlated.",
+    "Weight bounds describe the scalar pooling operator, not the information content of its values."
+  ],
+  "plain": {
+    "evaluator_reconstruction": {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    },
+    "groups": {
+      "all": {
+        "n": 10758,
+        "images": 1500,
+        "accuracy_pct": {
+          "0.3": 81.50213794385573,
+          "0.5": 75.2649191299498,
+          "0.6": 70.36623907789551,
+          "0.75": 56.646216768916155,
+          "0.9": 18.637293177170477
+        },
+        "mean_iou_pct": 64.96323226966602,
+        "failures_at_0_5": 2661,
+        "near_threshold_failures_0_3_to_0_5": 671,
+        "failed_prediction_center_inside_gt": 708,
+        "median_center_error_in_gt_width_height": 0.07505531797911397,
+        "median_predicted_to_gt_width_ratio": 1.00347463997256,
+        "median_predicted_to_gt_height_ratio": 1.0122925442202009
+      },
+      "padded_area_lt_1pct": {
+        "n": 0,
+        "images": 0,
+        "accuracy_pct": {},
+        "mean_iou_pct": null,
+        "failures_at_0_5": 0,
+        "near_threshold_failures_0_3_to_0_5": 0,
+        "failed_prediction_center_inside_gt": 0,
+        "median_center_error_in_gt_width_height": null,
+        "median_predicted_to_gt_width_ratio": null,
+        "median_predicted_to_gt_height_ratio": null
+      },
+      "padded_area_1to10pct": {
+        "n": 4792,
+        "images": 950,
+        "accuracy_pct": {
+          "0.3": 75.271285475793,
+          "0.5": 67.779632721202,
+          "0.6": 61.87395659432388,
+          "0.75": 44.99165275459098,
+          "0.9": 8.493322203672788
+        },
+        "mean_iou_pct": 57.344635820441844,
+        "failures_at_0_5": 1544,
+        "near_threshold_failures_0_3_to_0_5": 359,
+        "failed_prediction_center_inside_gt": 322,
+        "median_center_error_in_gt_width_height": 0.1136893503423628,
+        "median_predicted_to_gt_width_ratio": 1.041298431861465,
+        "median_predicted_to_gt_height_ratio": 1.0374660001150717
+      },
+      "padded_area_ge_10pct": {
+        "n": 5966,
+        "images": 1175,
+        "accuracy_pct": {
+          "0.3": 86.50687227623199,
+          "0.5": 81.27723768018772,
+          "0.6": 77.18739523969158,
+          "0.75": 66.00737512571237,
+          "0.9": 26.785115655380487
+        },
+        "mean_iou_pct": 71.0826278755464,
+        "failures_at_0_5": 1117,
+        "near_threshold_failures_0_3_to_0_5": 312,
+        "failed_prediction_center_inside_gt": 386,
+        "median_center_error_in_gt_width_height": 0.054695150982154744,
+        "median_predicted_to_gt_width_ratio": 0.9856240710579895,
+        "median_predicted_to_gt_height_ratio": 1.0017857142857143
+      }
+    }
+  },
+  "fusion": {
+    "evaluator_reconstruction": {
+      "mode": "fp16",
+      "max_abs_error": 0.0
+    },
+    "groups": {
+      "all": {
+        "n": 10758,
+        "images": 1500,
+        "accuracy_pct": {
+          "0.3": 81.14891243725599,
+          "0.5": 75.04182933630787,
+          "0.6": 70.76594162483732,
+          "0.75": 57.27830451756832,
+          "0.9": 19.61331102435397
+        },
+        "mean_iou_pct": 65.10243453632168,
+        "failures_at_0_5": 2685,
+        "near_threshold_failures_0_3_to_0_5": 657,
+        "failed_prediction_center_inside_gt": 696,
+        "median_center_error_in_gt_width_height": 0.07283949766439729,
+        "median_predicted_to_gt_width_ratio": 1.0111966413065425,
+        "median_predicted_to_gt_height_ratio": 1.0049019639161743
+      },
+      "padded_area_lt_1pct": {
+        "n": 0,
+        "images": 0,
+        "accuracy_pct": {},
+        "mean_iou_pct": null,
+        "failures_at_0_5": 0,
+        "near_threshold_failures_0_3_to_0_5": 0,
+        "failed_prediction_center_inside_gt": 0,
+        "median_center_error_in_gt_width_height": null,
+        "median_predicted_to_gt_width_ratio": null,
+        "median_predicted_to_gt_height_ratio": null
+      },
+      "padded_area_1to10pct": {
+        "n": 4792,
+        "images": 950,
+        "accuracy_pct": {
+          "0.3": 74.12353923205343,
+          "0.5": 66.98664440734558,
+          "0.6": 61.93656093489148,
+          "0.75": 45.36727879799666,
+          "0.9": 9.119365609348915
+        },
+        "mean_iou_pct": 57.0821073502283,
+        "failures_at_0_5": 1582,
+        "near_threshold_failures_0_3_to_0_5": 342,
+        "failed_prediction_center_inside_gt": 326,
+        "median_center_error_in_gt_width_height": 0.1115263087313805,
+        "median_predicted_to_gt_width_ratio": 1.0452541559642539,
+        "median_predicted_to_gt_height_ratio": 1.0304303251425433
+      },
+      "padded_area_ge_10pct": {
+        "n": 5966,
+        "images": 1175,
+        "accuracy_pct": {
+          "0.3": 86.79182031511901,
+          "0.5": 81.51190077103587,
+          "0.6": 77.85786121354342,
+          "0.75": 66.84545759302716,
+          "0.9": 28.042239356352667
+        },
+        "mean_iou_pct": 71.54450759628807,
+        "failures_at_0_5": 1103,
+        "near_threshold_failures_0_3_to_0_5": 315,
+        "failed_prediction_center_inside_gt": 370,
+        "median_center_error_in_gt_width_height": 0.05272968983992696,
+        "median_predicted_to_gt_width_ratio": 0.9921557341775353,
+        "median_predicted_to_gt_height_ratio": 0.9938380281690141
+      }
+    }
+  },
+  "cosine_pooling_bounds": {
+    "assumption": "Exact cosine logits in [-1,1], temperature=1, N=576; no token masking.",
+    "maximum_weight_ratio": 7.38905609893065,
+    "maximum_single_patch_mass": 0.012687491328263334,
+    "maximum_mass_for_k_patches": {
+      "1": 0.012687491328263334,
+      "6": 0.07216646368720477,
+      "29": 0.2814757874487333,
+      "58": 0.45275827740937813
+    },
+    "warning": "Analytical upper bounds, not observed attention weights or accuracy predictions."
+  }
+}

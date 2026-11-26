@@ -1,0 +1,23 @@
+[
+  {
+    "run": "plain",
+    "name": "predictions_val_epoch_017.jsonl",
+    "bytes": 4038835,
+    "sha256": "c37065d1611fabd05a9a0e1bd1c5ee923053f5dd8eb29c7e79855a6ea14eccae",
+    "uploaded_to_github": false
+  },
+  {
+    "run": "paired_control",
+    "name": "predictions_val_epoch_017.jsonl",
+    "bytes": 4038995,
+    "sha256": "23102cee8134d8b6b1e5f3d14b5cdaa5c3a48775a5d2c4d9b0d1bb87468d8bf2",
+    "uploaded_to_github": false
+  },
+  {
+    "run": "fusion",
+    "name": "predictions_val_epoch_019.jsonl",
+    "bytes": 4038923,
+    "sha256": "eafec9d94f35b1ef94cb1a68d557b1dc2456b23940363d6da620199966c40bb1",
+    "uploaded_to_github": false
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "destination": "oss://datasets/experiments/syntax_local_20pct_20261124/control/finetune/checkpoints.tar",
+  "bytes": 5472604160,
+  "sha256": "60c3b9eccf4ac144f4b1e44f25528c3f512aa2f511d83fcb3d48947c63c8b998"
+}

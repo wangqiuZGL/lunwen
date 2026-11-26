@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-25",
+  "currency_cost": "Unknown: actual rate and billed uptime not supplied",
+  "measured_runtime_hours": 16.057777777777776,
+  "runtime_scope": "Nov24 downloaded stage timers, includes in-stage validation and smoke; excludes older runs, setup, transfers and paid idle",
+  "plain_acc": 75.2649188041687,
+  "fusion_acc": 75.04183053970337,
+  "fusion_vs_plain": {
+    "delta_pp": -0.2230897936419409,
+    "corrected": 764,
+    "regressed": 788,
+    "image_bootstrap_delta_95ci_pp": [
+      -0.9925710317311742,
+      0.5563852079672353
+    ]
+  },
+  "decision": "Stop additional long runs; first screen a frozen readout hypothesis under a <=45-minute budget.",
+  "status": "No GPU available; no new training or real-feature extraction started. Five pooling math tests passed; accuracy benefit unknown."
+}
