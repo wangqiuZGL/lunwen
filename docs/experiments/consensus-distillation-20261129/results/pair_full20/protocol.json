@@ -1,0 +1,16 @@
+{
+  "experiment": "paired_distill19",
+  "split": "val",
+  "full": true,
+  "samples": 10758,
+  "seeds": [
+    42,
+    43
+  ],
+  "arms": [
+    "native",
+    "anchored_quality"
+  ],
+  "selection": "Both fixed final1024step checkpoints, no best-seed or best-step selection",
+  "scope": "Official val previously used for baseline checkpoint choice and exploratory analyses; final test only after method frozen"
+}

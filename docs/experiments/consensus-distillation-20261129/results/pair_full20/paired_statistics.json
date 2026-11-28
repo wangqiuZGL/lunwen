@@ -1,0 +1,38 @@
+{
+  "anchored_quality_42_vs_original": {
+    "delta_pp": 0.1766127496957779,
+    "ci95_pp": [
+      0.07455002079733349,
+      0.28590599483483264
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  },
+  "anchored_quality_42_vs_native_42": {
+    "delta_pp": 0.43688416481018066,
+    "ci95_pp": [
+      0.1749864152334828,
+      0.7148872788123674
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  },
+  "anchored_quality_43_vs_original": {
+    "delta_pp": 0.1115448996424675,
+    "ci95_pp": [
+      0.0,
+      0.23109845795712114
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  },
+  "anchored_quality_43_vs_native_43": {
+    "delta_pp": 0.381111741065979,
+    "ci95_pp": [
+      0.10935461078144569,
+      0.6570076243195159
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  }
+}

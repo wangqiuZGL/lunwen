@@ -1,0 +1,62 @@
+{
+  "status": "completed",
+  "protocol": {
+    "experiment": "paired_distill19",
+    "split": "val",
+    "full": true,
+    "samples": 10758,
+    "seeds": [
+      42,
+      43
+    ],
+    "arms": [
+      "native",
+      "anchored_quality"
+    ],
+    "selection": "Both fixed final1024step checkpoints, no best-seed or best-step selection",
+    "scope": "Official val previously used for baseline checkpoint choice and exploratory analyses; final test only after method frozen"
+  },
+  "results": {
+    "original": {
+      "acc50": 75.27421569824219,
+      "acc75": 56.62762451171875,
+      "miou": 64.96394348144531,
+      "corrected": 0,
+      "regressed": 0,
+      "delta_pp": 0.0
+    },
+    "native_42": {
+      "acc50": 75.0139389038086,
+      "acc75": 55.25190734863281,
+      "miou": 64.63693237304688,
+      "corrected": 89,
+      "regressed": 117,
+      "delta_pp": -0.26027679443359375
+    },
+    "anchored_quality_42": {
+      "acc50": 75.4508285522461,
+      "acc75": 56.72987747192383,
+      "miou": 64.97784423828125,
+      "corrected": 26,
+      "regressed": 7,
+      "delta_pp": 0.17661285400390625
+    },
+    "native_43": {
+      "acc50": 75.00464630126953,
+      "acc75": 55.7166748046875,
+      "miou": 64.80659484863281,
+      "corrected": 87,
+      "regressed": 116,
+      "delta_pp": -0.26956939697265625
+    },
+    "anchored_quality_43": {
+      "acc50": 75.38575744628906,
+      "acc75": 56.767059326171875,
+      "miou": 64.97471618652344,
+      "corrected": 25,
+      "regressed": 13,
+      "delta_pp": 0.111541748046875
+    }
+  },
+  "seconds": 748.6762632408645
+}

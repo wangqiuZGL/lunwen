@@ -1,5 +1,5 @@
 {
-  "status": "queued_after_live_full_val",
+  "status": "smoke_passed_native_freeze_epoch1_running",
   "full_val_run": "pair_full20",
   "initialization": "Same original task-trained OneRef checkpoint for both arms; continued training, not pretrained-from-scratch reproduction",
   "arms": [
@@ -35,5 +35,6 @@
   "scheduler": "Stage-wise cosine to0.1initial LR",
   "augmentation": "Deterministic384view, teacher coordinates unchanged",
   "checkpoint": "Atomic epoch-boundary optimizer/model/RNG recovery; development-best and final separate",
-  "storage": "Completed optimizer resume and temporary archive pruned only after OSS success200; best/final weights retained"
+  "storage": "Completed optimizer resume and temporary archive pruned only after OSS success200; best/final weights retained",
+  "full_val_status": "completed_weak_gain"
 }
