@@ -56,3 +56,8 @@ OSS根目录：`oss://datasets/experiments/layerwise_20261127/`。关键记录�
 运行根目录`/hy-tmp/layerwise-20261127`；状态`pair19.status`，日志`teacher_train18.log`、`pair_smoke19.log`、`paired_distill19.log`。普通native与anchored_quality各42/43种子，1024步、batch16，训练最后两层/定位头；无筛选蒸馏不是本轮必跑组，旧结果仍保留。原始teacher/学生GT只来自官方train，最终test不参与本轮。
 
 当前记录仅证明流水线已启动，不等于4次训练已完成。实际训练状态应以GPU进程、日志更新和results.json为准。归档最终自动上传`paired_distill19_records.tar.gz`到既有OSS实验根目录。SSH凭据未保存到仓库。
+
+
+## 成对训练已完成
+
+4096条两组×两种子训练与自动备份均已完成。候选均值77.7832%，普通继续训练77.4170%，原检查点77.5879%；区间仍含零，保留为弱正向开发信号。见[最终报告](PAIRED_4096_REPORT.md)。GPU空闲，状态以本更新为准。

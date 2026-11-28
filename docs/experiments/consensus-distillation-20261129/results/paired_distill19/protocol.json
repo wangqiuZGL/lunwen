@@ -1,0 +1,24 @@
+{
+  "seeds": [
+    42,
+    43
+  ],
+  "arms": [
+    "native",
+    "anchored_quality"
+  ],
+  "steps": 1024,
+  "batch": 16,
+  "encoder_lr": 3e-06,
+  "head_lr": 1e-05,
+  "weight_decay": 0.0001,
+  "train": 4096,
+  "val": 2048,
+  "kd_weight": 2.0,
+  "teacher_margin": 0.01,
+  "min_teacher_iou": 0.5,
+  "precision": "fp32",
+  "training_mode": "last2",
+  "selection": "Fixed final update, no validation-based early stopping",
+  "scope": "Encoder blocks10/11 plus grounding heads;4096official-train;2048development val; single-forward student; no test access or novelty claim"
+}
