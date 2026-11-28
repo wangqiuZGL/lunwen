@@ -1,6 +1,6 @@
 # OneRef 推理改进与蒸馏实验交接
 
-更新：2026-11-29。状态：已有结果归档；下一轮4096条成对训练尚未启动，等待可连接的GPU服务器。
+更新：2026-11-29。状态：已有结果归档；4096条成对训练流水线已启动：先teacher_train18生成教师，再pair_smoke19检查梯度与坐标，随后paired_distill19执行两组×两种子。
 
 ## 已确认与未确认的结论
 
@@ -47,3 +47,12 @@
 Git只存代码、协议、数字摘要和来源索引；不存SSH密码、OSS凭据、数据集、原始图片、权重或大缓存。原权重/707图恢复包为`layerwise_512_256_bootstrap.tar`，只适用原小划分，不能充作4096完整数据。
 
 OSS根目录：`oss://datasets/experiments/layerwise_20261127/`。关键记录包：`verified_refinement_final_records.tar.gz`、`verified_refinement_final_review.tar.gz`、`distill15_records.tar.gz`、`distill_anchor16_records.tar.gz`、`encoder_distill17_records.tar.gz`。这些路径是先前已确认上传记录，本次归档未重新联网校验OSS对象。
+
+
+## 2026-11-29实际启动补充
+
+新增`prepare_teacher_4096.py --train-manifest`与`train_paired_distill_4096.py --teacher-dir`，已实现4096教师manifest独立入口；上文关于旧512脚本不能直接扩展的限制仍成立。新的训练入口强制4096条训练、教师manifest一致、每批教师GT/学生GT精确一致，原模型2048预测先复现。先运行2步anchored_quality真实GPU smoke（128条开发val），通过才执行正式基线与候选。
+
+运行根目录`/hy-tmp/layerwise-20261127`；状态`pair19.status`，日志`teacher_train18.log`、`pair_smoke19.log`、`paired_distill19.log`。普通native与anchored_quality各42/43种子，1024步、batch16，训练最后两层/定位头；无筛选蒸馏不是本轮必跑组，旧结果仍保留。原始teacher/学生GT只来自官方train，最终test不参与本轮。
+
+当前记录仅证明流水线已启动，不等于4次训练已完成。实际训练状态应以GPU进程、日志更新和results.json为准。归档最终自动上传`paired_distill19_records.tar.gz`到既有OSS实验根目录。SSH凭据未保存到仓库。

@@ -1,5 +1,5 @@
 {
-  "status": "prepared_waiting_for_reachable_server",
+  "status": "pipeline_launched_teacher_generation",
   "arms": [
     "native",
     "anchored_quality"
@@ -30,5 +30,10 @@
   "initialization": "Same original OneRef checkpoint, not prior adapted student",
   "baseline_scope": "Matched continued-training baseline, not a from-scratch official-paper reproduction",
   "estimated_gpu_minutes": "30-60 initial planning estimate; must update after100steps throughput measurement",
-  "server_status": "Old SSH endpoint refused connection on2026-11-29; no job launched"
+  "server_status": "Server reconnected2026-11-29; assets present and GPU initiallyidle",
+  "runtime_root": "/hy-tmp/layerwise-20261127",
+  "teacher_run": "teacher_train18",
+  "training_run": "paired_distill19",
+  "status_file": "pair19.status",
+  "entry": "train_paired_distill_4096.py"
 }
