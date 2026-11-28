@@ -1,0 +1,204 @@
+{
+  "status": "completed",
+  "protocol": {
+    "train": 512,
+    "val": 256,
+    "seeds": [
+      42,
+      43
+    ],
+    "arms": [
+      "native",
+      "all_teacher",
+      "quality_gated"
+    ],
+    "steps": 256,
+    "batch": 32,
+    "lr": 1e-05,
+    "kd_weight": 2.0,
+    "margin": 0.01,
+    "min_teacher_iou": 0.5,
+    "teacher": "Frozen verified_consensus_0.02, original+flip two-view inference on official training only",
+    "student": "Frozen backbone cached final features, train original grounding heads only; single original-view inference",
+    "quality_rule": "Train-GT relative IoU gain>0.01 and teacherIoU>=0.5; no gate/GT at student inference",
+    "selection": "Fixed final256step, all arms and both seeds reported; exploratory val only, no testA/testB tuning",
+    "scope": "Small mechanism pilot, not full end-to-end training, no novelty or improvement claim before results",
+    "accepted": 146
+  },
+  "baseline": {
+    "acc50": 75.78125,
+    "acc75": 57.8125,
+    "miou": 66.45622253417969
+  },
+  "results": {
+    "native_42": {
+      "final": {
+        "acc50": 74.609375,
+        "acc75": 56.640625,
+        "miou": 66.24871063232422
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.4407660961151123,
+          "kd": 0.08196262270212173,
+          "loss": 2.4407660961151123
+        },
+        {
+          "step": 128,
+          "native": 2.6923906803131104,
+          "kd": 0.11747018992900848,
+          "loss": 2.6923906803131104
+        },
+        {
+          "step": 256,
+          "native": 2.5583906173706055,
+          "kd": 0.15234452486038208,
+          "loss": 2.5583906173706055
+        }
+      ]
+    },
+    "all_teacher_42": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 57.8125,
+        "miou": 66.35263061523438
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.4407660961151123,
+          "kd": 0.08196262270212173,
+          "loss": 2.60469126701355
+        },
+        {
+          "step": 128,
+          "native": 2.719424247741699,
+          "kd": 0.06531989574432373,
+          "loss": 2.8500640392303467
+        },
+        {
+          "step": 256,
+          "native": 2.6104836463928223,
+          "kd": 0.09027092158794403,
+          "loss": 2.791025400161743
+        }
+      ]
+    },
+    "quality_gated_42": {
+      "final": {
+        "acc50": 74.609375,
+        "acc75": 58.59375,
+        "miou": 66.51953887939453
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.4407660961151123,
+          "kd": 0.011651033535599709,
+          "loss": 2.4640681743621826
+        },
+        {
+          "step": 128,
+          "native": 2.705674171447754,
+          "kd": 0.03437276929616928,
+          "loss": 2.7744197845458984
+        },
+        {
+          "step": 256,
+          "native": 2.5818419456481934,
+          "kd": 0.04157871752977371,
+          "loss": 2.664999485015869
+        }
+      ]
+    },
+    "native_43": {
+      "final": {
+        "acc50": 74.609375,
+        "acc75": 56.25,
+        "miou": 66.24164581298828
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.2342898845672607,
+          "kd": 0.08272628486156464,
+          "loss": 2.2342898845672607
+        },
+        {
+          "step": 128,
+          "native": 2.368191719055176,
+          "kd": 0.11367690563201904,
+          "loss": 2.368191719055176
+        },
+        {
+          "step": 256,
+          "native": 2.523512125015259,
+          "kd": 0.1514178216457367,
+          "loss": 2.523512125015259
+        }
+      ]
+    },
+    "all_teacher_43": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 57.8125,
+        "miou": 66.38642120361328
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.2342898845672607,
+          "kd": 0.08272628486156464,
+          "loss": 2.399742364883423
+        },
+        {
+          "step": 128,
+          "native": 2.3885130882263184,
+          "kd": 0.07226347923278809,
+          "loss": 2.5330400466918945
+        },
+        {
+          "step": 256,
+          "native": 2.5686702728271484,
+          "kd": 0.07972464710474014,
+          "loss": 2.7281196117401123
+        }
+      ]
+    },
+    "quality_gated_43": {
+      "final": {
+        "acc50": 74.609375,
+        "acc75": 58.203125,
+        "miou": 66.42991638183594
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.2342898845672607,
+          "kd": 0.03844382241368294,
+          "loss": 2.3111774921417236
+        },
+        {
+          "step": 128,
+          "native": 2.3785221576690674,
+          "kd": 0.025179484859108925,
+          "loss": 2.4288811683654785
+        },
+        {
+          "step": 256,
+          "native": 2.539316177368164,
+          "kd": 0.01274027582257986,
+          "loss": 2.5647966861724854
+        }
+      ]
+    }
+  },
+  "seconds": 24.251618541078642
+}

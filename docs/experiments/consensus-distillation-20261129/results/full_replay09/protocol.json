@@ -1,0 +1,20 @@
+{
+  "seeds": [
+    42,
+    43
+  ],
+  "arms": [
+    "native"
+  ],
+  "steps": 256,
+  "batch": 16,
+  "encoder_lr": 1e-05,
+  "head_lr": 1e-05,
+  "weight_decay": 0.0001,
+  "train": 8192,
+  "val": 2048,
+  "precision": "bf16",
+  "training_mode": "full_replay",
+  "selection": "Fixed final update, no validation-based early stopping",
+  "scope": "New official-training images; reused exploratory256 val. Plain objective ablation, no novelty claim"
+}

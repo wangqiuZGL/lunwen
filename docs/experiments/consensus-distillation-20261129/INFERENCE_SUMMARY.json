@@ -1,0 +1,141 @@
+{
+  "candidate": "verified_consensus_0.02",
+  "rows": [
+    {
+      "split": "val",
+      "samples": 10758,
+      "baseline": {
+        "acc50": 75.27421569824219,
+        "acc75": 56.62762451171875,
+        "miou": 64.96394348144531,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "candidate": {
+        "acc50": 75.82264709472656,
+        "acc75": 57.73377990722656,
+        "miou": 65.56880187988281,
+        "corrected": 123,
+        "regressed": 64
+      },
+      "statistics": {
+        "candidate": "verified_consensus_0.02",
+        "samples": 10758,
+        "corrected": 123,
+        "regressed": 64,
+        "expression_exact_mcnemar_p": 1.9142511571064113e-05,
+        "acc50": {
+          "delta_pp": 0.548429076036438,
+          "ci95_pp": [
+            0.27137487438283,
+            0.8183655737440572
+          ],
+          "clusters": 1500,
+          "draws": 5000
+        },
+        "miou": {
+          "delta_pp": 0.6048593670129776,
+          "ci95_pp": [
+            0.4952168940196218,
+            0.7140694043265815
+          ],
+          "clusters": 1500,
+          "draws": 5000
+        },
+        "scope": "Fixed-model paired image-cluster resampling; no training-seed uncertainty or multiple-search correction. Val estimates remain exploratory after method search."
+      },
+      "integration_max_error": null
+    },
+    {
+      "split": "testA",
+      "samples": 5726,
+      "baseline": {
+        "acc50": 79.56688690185547,
+        "acc75": 62.451969146728516,
+        "miou": 68.9476547241211,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "candidate": {
+        "acc50": 80.30038452148438,
+        "acc75": 63.9015007019043,
+        "miou": 69.79085540771484,
+        "corrected": 72,
+        "regressed": 30
+      },
+      "statistics": {
+        "candidate": "verified_consensus_0.02",
+        "samples": 5726,
+        "corrected": 72,
+        "regressed": 30,
+        "expression_exact_mcnemar_p": 3.885014426598705e-05,
+        "acc50": {
+          "delta_pp": 0.7334963325183375,
+          "ci95_pp": [
+            0.34177036970043345,
+            1.1263887573917166
+          ],
+          "clusters": 750,
+          "draws": 5000
+        },
+        "miou": {
+          "delta_pp": 0.8431974798440933,
+          "ci95_pp": [
+            0.6937751722676936,
+            0.9978837823482194
+          ],
+          "clusters": 750,
+          "draws": 5000
+        },
+        "scope": "Fixed-model paired image-cluster resampling; no training-seed uncertainty or multiple-search correction. Val estimates remain exploratory after method search."
+      },
+      "integration_max_error": 5.960464477539063e-08
+    },
+    {
+      "split": "testB",
+      "samples": 4889,
+      "baseline": {
+        "acc50": 67.43710327148438,
+        "acc75": 46.12395095825195,
+        "miou": 58.61219024658203,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "candidate": {
+        "acc50": 67.98936462402344,
+        "acc75": 46.75802993774414,
+        "miou": 59.1451530456543,
+        "corrected": 65,
+        "regressed": 38
+      },
+      "statistics": {
+        "candidate": "verified_consensus_0.02",
+        "samples": 4889,
+        "corrected": 65,
+        "regressed": 38,
+        "expression_exact_mcnemar_p": 0.010063333265586337,
+        "acc50": {
+          "delta_pp": 0.5522601759050931,
+          "ci95_pp": [
+            0.10360547036883548,
+            1.0034866049918774
+          ],
+          "clusters": 750,
+          "draws": 5000
+        },
+        "miou": {
+          "delta_pp": 0.532957911491394,
+          "ci95_pp": [
+            0.3690343184264646,
+            0.7013304997211227
+          ],
+          "clusters": 750,
+          "draws": 5000
+        },
+        "scope": "Fixed-model paired image-cluster resampling; no training-seed uncertainty or multiple-search correction. Val estimates remain exploratory after method search."
+      },
+      "integration_max_error": 0.0
+    }
+  ],
+  "scope": "Fixed baseline checkpoint, deterministic inference change, FP32 matched comparison, no training improvement or novelty claim"
+}

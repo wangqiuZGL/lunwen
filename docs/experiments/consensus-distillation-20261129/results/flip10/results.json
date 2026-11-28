@@ -1,0 +1,67 @@
+{
+  "status": "completed",
+  "protocol": {
+    "split": "val",
+    "full": false,
+    "confirmation": false,
+    "samples": 256,
+    "rules": [
+      "original",
+      "flip",
+      "mean",
+      "consensus_mean",
+      "valid_projection",
+      "consensus_projection"
+    ],
+    "consensus_iou": 0.5,
+    "direction_policy": "No change on expressions containing left/right/compass-direction/clock tokens; all methods fall back to original",
+    "scope": "Fixed inference rules with extra forward cost; no novelty claim; validation reused, final test only after config freeze"
+  },
+  "skipped": 4,
+  "accepted": 230,
+  "results": {
+    "original": {
+      "acc50": 75.78125,
+      "acc75": 57.8125,
+      "miou": 66.4561767578125,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "flip": {
+      "acc50": 75.0,
+      "acc75": 58.984375,
+      "miou": 65.68576049804688,
+      "corrected": 9,
+      "regressed": 11
+    },
+    "mean": {
+      "acc50": 73.4375,
+      "acc75": 58.984375,
+      "miou": 65.39399719238281,
+      "corrected": 4,
+      "regressed": 10
+    },
+    "consensus_mean": {
+      "acc50": 76.171875,
+      "acc75": 60.9375,
+      "miou": 66.9302978515625,
+      "corrected": 3,
+      "regressed": 2
+    },
+    "valid_projection": {
+      "acc50": 75.78125,
+      "acc75": 57.8125,
+      "miou": 66.60856628417969,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "consensus_projection": {
+      "acc50": 76.171875,
+      "acc75": 61.328125,
+      "miou": 67.07763671875,
+      "corrected": 3,
+      "regressed": 2
+    }
+  },
+  "seconds": 13.694670898839831
+}

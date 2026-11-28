@@ -1,0 +1,240 @@
+{
+  "status": "completed",
+  "baseline": {
+    "acc50": 75.78125,
+    "acc75": 57.8125,
+    "miou": 66.4561767578125
+  },
+  "protocol": {
+    "seeds": [
+      42,
+      43
+    ],
+    "arms": [
+      "native",
+      "box_only"
+    ],
+    "steps": 128,
+    "batch": 16,
+    "encoder_lr": 1e-05,
+    "head_lr": 1e-05,
+    "weight_decay": 0.0001,
+    "train": 1536,
+    "val": 256,
+    "precision": "FP32; initialFP16 GradScaler run overflowed before completing its first update and is excluded",
+    "training_mode": "Gradients in encoder blocks10/11 zero-based, final norm and original grounding heads only; model eval mode fixes dropout; original stochastic train image transforms",
+    "selection": "Fixed final update, no validation-based early stopping",
+    "scope": "New official-training images; reused exploratory256 val. Plain objective ablation, no novelty claim"
+  },
+  "results": {
+    "native_42": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 58.203125,
+        "miou": 66.13713836669922
+      },
+      "corrected": 2,
+      "regressed": 3,
+      "gradient_conflict_first_batch": {
+        "cosine": -0.0023511570402154035,
+        "box_norm": 4.972233551035024,
+        "aux_norm": 1.7296274432011016
+      },
+      "trace": [
+        {
+          "step": 1,
+          "loss": 2.9323720932006836,
+          "box": 0.6793670654296875,
+          "aux": 2.253005027770996,
+          "grad_norm": 5.2606353759765625,
+          "seconds": 0.7870478369295597
+        },
+        {
+          "step": 32,
+          "loss": 3.2268691062927246,
+          "box": 0.9312609434127808,
+          "aux": 2.2956082820892334,
+          "grad_norm": 5.319058895111084,
+          "seconds": 9.388821437954903
+        },
+        {
+          "step": 64,
+          "loss": 2.779604911804199,
+          "box": 0.7423449158668518,
+          "aux": 2.037260055541992,
+          "grad_norm": 5.003371238708496,
+          "seconds": 18.196734067983925
+        },
+        {
+          "step": 128,
+          "loss": 2.8147008419036865,
+          "box": 0.7008056640625,
+          "aux": 2.1138951778411865,
+          "grad_norm": 6.9060211181640625,
+          "seconds": 36.479905331041664
+        }
+      ],
+      "steps": 128,
+      "seconds": 40.24332369398326,
+      "trainable_parameters": 31339780,
+      "peak_memory_mb": 4312.7138671875
+    },
+    "box_only_42": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 58.203125,
+        "miou": 66.18833923339844
+      },
+      "corrected": 0,
+      "regressed": 1,
+      "gradient_conflict_first_batch": {
+        "cosine": -0.0023511570402154035,
+        "box_norm": 4.972233551035024,
+        "aux_norm": 1.7296274432011016
+      },
+      "trace": [
+        {
+          "step": 1,
+          "loss": 0.6793670654296875,
+          "box": 0.6793670654296875,
+          "aux": 2.253005027770996,
+          "grad_norm": 4.972233772277832,
+          "seconds": 0.7153798430226743
+        },
+        {
+          "step": 32,
+          "loss": 0.9173910021781921,
+          "box": 0.9173910021781921,
+          "aux": 2.3138673305511475,
+          "grad_norm": 4.584567546844482,
+          "seconds": 9.381204077973962
+        },
+        {
+          "step": 64,
+          "loss": 0.7403016090393066,
+          "box": 0.7403016090393066,
+          "aux": 2.0559659004211426,
+          "grad_norm": 4.749581336975098,
+          "seconds": 18.335497993044555
+        },
+        {
+          "step": 128,
+          "loss": 0.7061775326728821,
+          "box": 0.7061775326728821,
+          "aux": 2.1463398933410645,
+          "grad_norm": 5.9908952713012695,
+          "seconds": 37.06930910097435
+        }
+      ],
+      "steps": 128,
+      "seconds": 40.9624260221608,
+      "trainable_parameters": 31339780,
+      "peak_memory_mb": 4309.6357421875
+    },
+    "native_43": {
+      "final": {
+        "acc50": 73.828125,
+        "acc75": 54.6875,
+        "miou": 65.79608917236328
+      },
+      "corrected": 1,
+      "regressed": 6,
+      "gradient_conflict_first_batch": {
+        "cosine": 0.05046618381349392,
+        "box_norm": 6.334750066213072,
+        "aux_norm": 0.7450192000544986
+      },
+      "trace": [
+        {
+          "step": 1,
+          "loss": 2.655609607696533,
+          "box": 0.7108064889907837,
+          "aux": 1.94480299949646,
+          "grad_norm": 6.415641784667969,
+          "seconds": 0.7431569509208202
+        },
+        {
+          "step": 32,
+          "loss": 2.6953139305114746,
+          "box": 0.6719672679901123,
+          "aux": 2.0233466625213623,
+          "grad_norm": 6.254344940185547,
+          "seconds": 9.53182255080901
+        },
+        {
+          "step": 64,
+          "loss": 2.634925365447998,
+          "box": 0.5608279705047607,
+          "aux": 2.0740973949432373,
+          "grad_norm": 5.756896495819092,
+          "seconds": 18.642029997892678
+        },
+        {
+          "step": 128,
+          "loss": 2.960038661956787,
+          "box": 0.8421438932418823,
+          "aux": 2.1178946495056152,
+          "grad_norm": 4.970283031463623,
+          "seconds": 37.45801159297116
+        }
+      ],
+      "steps": 128,
+      "seconds": 41.37575980089605,
+      "trainable_parameters": 31339780,
+      "peak_memory_mb": 4308.65185546875
+    },
+    "box_only_43": {
+      "final": {
+        "acc50": 74.609375,
+        "acc75": 57.03125,
+        "miou": 66.09211730957031
+      },
+      "corrected": 1,
+      "regressed": 4,
+      "gradient_conflict_first_batch": {
+        "cosine": 0.05046618381349392,
+        "box_norm": 6.334750066213072,
+        "aux_norm": 0.7450192000544986
+      },
+      "trace": [
+        {
+          "step": 1,
+          "loss": 0.7108064889907837,
+          "box": 0.7108064889907837,
+          "aux": 1.94480299949646,
+          "grad_norm": 6.334749698638916,
+          "seconds": 0.7507168198935688
+        },
+        {
+          "step": 32,
+          "loss": 0.6632071137428284,
+          "box": 0.6632071137428284,
+          "aux": 2.0224733352661133,
+          "grad_norm": 5.429050445556641,
+          "seconds": 9.562844197964296
+        },
+        {
+          "step": 64,
+          "loss": 0.574027419090271,
+          "box": 0.574027419090271,
+          "aux": 2.132993221282959,
+          "grad_norm": 3.9038474559783936,
+          "seconds": 18.721041339915246
+        },
+        {
+          "step": 128,
+          "loss": 0.8416237831115723,
+          "box": 0.8416237831115723,
+          "aux": 2.2483558654785156,
+          "grad_norm": 4.158989429473877,
+          "seconds": 37.48538104305044
+        }
+      ],
+      "steps": 128,
+      "seconds": 41.3628786590416,
+      "trainable_parameters": 31339780,
+      "peak_memory_mb": 4308.4169921875
+    }
+  },
+  "seconds": 178.44654562091455
+}

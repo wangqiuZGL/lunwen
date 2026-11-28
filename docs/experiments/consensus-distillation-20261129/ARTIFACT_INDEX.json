@@ -1,0 +1,152 @@
+[
+  {
+    "run": "screen01",
+    "file": "docs/experiments/consensus-distillation-20261129/results/screen01/results.json",
+    "sha256": "147eb5b300fc111e541f9a679638b0f8c6eb8859189c5b1353ed13d244d71fc5"
+  },
+  {
+    "run": "diagnostic02",
+    "file": "docs/experiments/consensus-distillation-20261129/results/diagnostic02/results.json",
+    "sha256": "2fbf1cdbe11acd4db4418a8a33a92968dc4311b79aaaf49c8e9a1ff34a2b29d3"
+  },
+  {
+    "run": "diagnostic02",
+    "file": "docs/experiments/consensus-distillation-20261129/results/diagnostic02/protocol.json",
+    "sha256": "b140aa507d196c39ce040e4ffd294fefbdafb27d96947f5a567c23f601b628a1"
+  },
+  {
+    "run": "scale03",
+    "file": "docs/experiments/consensus-distillation-20261129/results/scale03/results.json",
+    "sha256": "3d04dc1405b1423d7c2e492be05a7c01585e1be961ac366d551a8b57e21874c9"
+  },
+  {
+    "run": "refinement04",
+    "file": "docs/experiments/consensus-distillation-20261129/results/refinement04/results.json",
+    "sha256": "4590bcca869edc0b937c2cd79bb28ec3be1376fb3f51a546d67168026eeb1e02"
+  },
+  {
+    "run": "refinement04",
+    "file": "docs/experiments/consensus-distillation-20261129/results/refinement04/protocol.json",
+    "sha256": "c317efd43826d2ad8b0c63f248e98a2ba6f81ec6478f05e6bf705f603900407f"
+  },
+  {
+    "run": "confirm05",
+    "file": "docs/experiments/consensus-distillation-20261129/results/confirm05/results.json",
+    "sha256": "93598cd1a9c4766d25e48d394cf8d4b722562f79e10465fe2d70bdc637897dd3"
+  },
+  {
+    "run": "lastblocks06_fp32",
+    "file": "docs/experiments/consensus-distillation-20261129/results/lastblocks06_fp32/results.json",
+    "sha256": "45c54e088a00a7e2a5fa20b4f02c2f2fc99d1b205cc58f2a5cbeefbd3e44f4fd"
+  },
+  {
+    "run": "full_replay09",
+    "file": "docs/experiments/consensus-distillation-20261129/results/full_replay09/results.json",
+    "sha256": "8ac0866123ef5c6ffb6a0a2eb84aacf6437fce3fc385a4452eccd76f7de1758e"
+  },
+  {
+    "run": "full_replay09",
+    "file": "docs/experiments/consensus-distillation-20261129/results/full_replay09/protocol.json",
+    "sha256": "cbf7aa5538dfbe3ef0d65d9977caef63b6cbf9eac25a0885d59c365345e7689c"
+  },
+  {
+    "run": "flip10",
+    "file": "docs/experiments/consensus-distillation-20261129/results/flip10/results.json",
+    "sha256": "aa0303bd4317b3fdfba07b43dae85ffc3952cc6820c94aa4b3aeaa0d01d04533"
+  },
+  {
+    "run": "flip_confirm11",
+    "file": "docs/experiments/consensus-distillation-20261129/results/flip_confirm11/results.json",
+    "sha256": "251b90b0230218139ee7bce052c6e1062ceb7fd87e040679ff7de2f90f72f5ec"
+  },
+  {
+    "run": "flip_confirm11",
+    "file": "docs/experiments/consensus-distillation-20261129/results/flip_confirm11/paired_statistics.json",
+    "sha256": "f7c7fc15e1640cba5c2ab6a78b4456223bca0771092dc1cedee949247f2faceb"
+  },
+  {
+    "run": "verify_calibration12",
+    "file": "docs/experiments/consensus-distillation-20261129/results/verify_calibration12/results.json",
+    "sha256": "1fa2e2a16f0f4f1aa323de6de6c6da4aab989dd282c910a3914b95bbb1c8ed4b"
+  },
+  {
+    "run": "verify_full13",
+    "file": "docs/experiments/consensus-distillation-20261129/results/verify_full13/results.json",
+    "sha256": "32fb60566bf5997a0c5929ab7e59127f0141e3583765e5ca8a0281a66b2305ce"
+  },
+  {
+    "run": "verify_full13",
+    "file": "docs/experiments/consensus-distillation-20261129/results/verify_full13/protocol.json",
+    "sha256": "e42b8251d87d4518725330a8203902ce95df3377c04fc331c9b538a3a022bd62"
+  },
+  {
+    "run": "verify_full13",
+    "file": "docs/experiments/consensus-distillation-20261129/results/verify_full13/paired_statistics.json",
+    "sha256": "25b6334fdcbb5d99e2b7f7451dcdb769aa25b42cf61ffa7108fbd274da47c78e"
+  },
+  {
+    "run": "final_testA14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testA14/results.json",
+    "sha256": "80d37aed0438f60de7090aa296161760ede9059260b4aad3d434155662c05c89"
+  },
+  {
+    "run": "final_testA14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testA14/protocol.json",
+    "sha256": "49d72c241588c8a02d728a1421a222fe02397ad1cd4f49469d7a7610a3421e14"
+  },
+  {
+    "run": "final_testA14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testA14/paired_statistics.json",
+    "sha256": "0fd72009d0aa54cc4d944ee5c06f8c57fc8b07d7be9c9f0626cd339d1c39efcf"
+  },
+  {
+    "run": "final_testB14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testB14/results.json",
+    "sha256": "90bbc2fc612dd6a9dc2c7cb24976ccda03fc452426fae0c9fcb4a1f509975bc5"
+  },
+  {
+    "run": "final_testB14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testB14/protocol.json",
+    "sha256": "da17d08b055da028f25717c00964f709147f9e87f110f1f49092df8145c6c171"
+  },
+  {
+    "run": "final_testB14",
+    "file": "docs/experiments/consensus-distillation-20261129/results/final_testB14/paired_statistics.json",
+    "sha256": "a128ffe40b7e51c3fea9c3d926fd152711e1463592dd72103ce6019c510017d5"
+  },
+  {
+    "run": "distill15",
+    "file": "docs/experiments/consensus-distillation-20261129/results/distill15/results.json",
+    "sha256": "58826bb738aa3b174a10e2e130c00ce2cacf2e63dcbe06db52447508c53c51bc"
+  },
+  {
+    "run": "distill15",
+    "file": "docs/experiments/consensus-distillation-20261129/results/distill15/protocol.json",
+    "sha256": "59fd4e60ad678a11c27849d8c7272c3ab223c35ccc967f8a0befacc7633b4f8d"
+  },
+  {
+    "run": "distill_anchor16",
+    "file": "docs/experiments/consensus-distillation-20261129/results/distill_anchor16/results.json",
+    "sha256": "b2861f1b015ea9746c7327b40c802894eee0db1c9a95c3132510b860cdc094a9"
+  },
+  {
+    "run": "distill_anchor16",
+    "file": "docs/experiments/consensus-distillation-20261129/results/distill_anchor16/protocol.json",
+    "sha256": "4f8b588b47228236b55d08ec3c6419b90f0c8162ad4be67697c42b3bd48b577f"
+  },
+  {
+    "run": "encoder_distill17",
+    "file": "docs/experiments/consensus-distillation-20261129/results/encoder_distill17/results.json",
+    "sha256": "e4ff927774e72587d5b0babf8d149ab0cc64b4c384f09802cb379a0a0bff7fd0"
+  },
+  {
+    "run": "encoder_distill17",
+    "file": "docs/experiments/consensus-distillation-20261129/results/encoder_distill17/protocol.json",
+    "sha256": "acf8902364964c07dfe753e7871ae2f51a48bd1607d97ae1ad93fd09916bbc28"
+  },
+  {
+    "run": "encoder_distill17",
+    "file": "docs/experiments/consensus-distillation-20261129/results/encoder_distill17/paired_statistics.json",
+    "sha256": "f348178c0f7d2557102bf411f326f812d1aca86350600da0e4135c9bcb27d0fc"
+  }
+]

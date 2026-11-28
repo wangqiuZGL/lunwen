@@ -1,0 +1,127 @@
+{
+  "status": "completed",
+  "baseline": {
+    "acc50": 77.587890625,
+    "acc75": 59.86328125,
+    "miou": 66.75336456298828
+  },
+  "protocol": {
+    "seeds": [
+      42,
+      43
+    ],
+    "arms": [
+      "native"
+    ],
+    "steps": 256,
+    "batch": 16,
+    "encoder_lr": 1e-05,
+    "head_lr": 1e-05,
+    "weight_decay": 0.0001,
+    "train": 8192,
+    "val": 2048,
+    "precision": "bf16",
+    "training_mode": "full_replay",
+    "selection": "Fixed final update, no validation-based early stopping",
+    "scope": "New official-training images; reused exploratory256 val. Plain objective ablation, no novelty claim"
+  },
+  "results": {
+    "native_42": {
+      "final": {
+        "acc50": 77.001953125,
+        "acc75": 56.689453125,
+        "miou": 65.51828002929688
+      },
+      "corrected": 53,
+      "regressed": 65,
+      "gradient_conflict_first_batch": null,
+      "trace": [
+        {
+          "step": 1,
+          "loss": 2.2200708389282227,
+          "box": 0.3569307327270508,
+          "aux": 1.8631399869918823,
+          "grad_norm": 13.546683311462402,
+          "seconds": 0.9694110620766878
+        },
+        {
+          "step": 32,
+          "loss": 2.610729932785034,
+          "box": 0.526107132434845,
+          "aux": 2.084622859954834,
+          "grad_norm": 19.98063087463379,
+          "seconds": 12.609183930093423
+        },
+        {
+          "step": 64,
+          "loss": 2.537792682647705,
+          "box": 0.6013485193252563,
+          "aux": 1.9364440441131592,
+          "grad_norm": 18.345260620117188,
+          "seconds": 24.688729740912095
+        },
+        {
+          "step": 256,
+          "loss": 2.8588573932647705,
+          "box": 0.7479760050773621,
+          "aux": 2.1108813285827637,
+          "grad_norm": 27.105897903442383,
+          "seconds": 97.68759368103929
+        }
+      ],
+      "steps": 256,
+      "seconds": 125.46638929494657,
+      "trainable_parameters": 224233732,
+      "peak_memory_mb": 15029.4833984375
+    },
+    "native_43": {
+      "final": {
+        "acc50": 76.953125,
+        "acc75": 56.591796875,
+        "miou": 65.53282165527344
+      },
+      "corrected": 44,
+      "regressed": 57,
+      "gradient_conflict_first_batch": null,
+      "trace": [
+        {
+          "step": 1,
+          "loss": 2.5470659732818604,
+          "box": 0.5529223680496216,
+          "aux": 1.9941436052322388,
+          "grad_norm": 34.67744064331055,
+          "seconds": 0.7304490390233696
+        },
+        {
+          "step": 32,
+          "loss": 2.6813104152679443,
+          "box": 0.6701200604438782,
+          "aux": 2.011190414428711,
+          "grad_norm": 18.883209228515625,
+          "seconds": 12.545009386958554
+        },
+        {
+          "step": 64,
+          "loss": 2.437021017074585,
+          "box": 0.5057253241539001,
+          "aux": 1.93129563331604,
+          "grad_norm": 26.929080963134766,
+          "seconds": 24.703677468933165
+        },
+        {
+          "step": 256,
+          "loss": 2.603933811187744,
+          "box": 0.7028607130050659,
+          "aux": 1.9010730981826782,
+          "grad_norm": 14.365348815917969,
+          "seconds": 97.86084343283437
+        }
+      ],
+      "steps": 256,
+      "seconds": 125.81784117384814,
+      "trainable_parameters": 224233732,
+      "peak_memory_mb": 15026.25048828125
+    }
+  },
+  "seconds": 293.62222347198986
+}

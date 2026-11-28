@@ -1,0 +1,90 @@
+{
+  "status": "completed",
+  "protocol": {
+    "train": 512,
+    "val": 256,
+    "seeds": [
+      42,
+      43
+    ],
+    "arms": [
+      "anchored_quality"
+    ],
+    "steps": 256,
+    "batch": 32,
+    "lr": 1e-05,
+    "kd_weight": 2.0,
+    "margin": 0.01,
+    "min_teacher_iou": 0.5,
+    "teacher": "Frozen verified_consensus_0.02, original+flip two-view inference on official training only",
+    "student": "Frozen backbone cached final features, train original grounding heads only; single original-view inference",
+    "quality_rule": "Improvement gate selects verified teacher; rejected samples distill original frozen prediction. Original native/all_teacher controls from distill15 use identical batches, init and optimizer.",
+    "selection": "Fixed final256step, all arms and both seeds reported; exploratory val only, no testA/testB tuning",
+    "scope": "Small mechanism pilot, not full end-to-end training, no novelty or improvement claim before results",
+    "accepted": 146
+  },
+  "baseline": {
+    "acc50": 75.78125,
+    "acc75": 57.8125,
+    "miou": 66.45622253417969
+  },
+  "results": {
+    "anchored_quality_42": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.8125,
+        "miou": 66.4653091430664
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.4407660961151123,
+          "kd": 0.011658208444714546,
+          "loss": 2.4640824794769287
+        },
+        {
+          "step": 128,
+          "native": 2.719564437866211,
+          "kd": 0.047020722180604935,
+          "loss": 2.813605785369873
+        },
+        {
+          "step": 256,
+          "native": 2.6166412830352783,
+          "kd": 0.04969450458884239,
+          "loss": 2.7160303592681885
+        }
+      ]
+    },
+    "anchored_quality_43": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.8125,
+        "miou": 66.47699737548828
+      },
+      "steps": 256,
+      "trace": [
+        {
+          "step": 1,
+          "native": 2.2342898845672607,
+          "kd": 0.03845081105828285,
+          "loss": 2.3111915588378906
+        },
+        {
+          "step": 128,
+          "native": 2.3916165828704834,
+          "kd": 0.03161996603012085,
+          "loss": 2.4548563957214355
+        },
+        {
+          "step": 256,
+          "native": 2.5787408351898193,
+          "kd": 0.022315947338938713,
+          "loss": 2.623372793197632
+        }
+      ]
+    }
+  },
+  "seconds": 8.999093065969646
+}

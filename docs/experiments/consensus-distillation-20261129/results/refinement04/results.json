@@ -1,0 +1,237 @@
+{
+  "status": "completed",
+  "protocol": {
+    "seeds": [
+      42,
+      43
+    ],
+    "steps": 256,
+    "batch": 32,
+    "native_head_lr": 3e-05,
+    "correction_lr": 0.0003,
+    "quality_steps": 128,
+    "quality_lr": 0.001,
+    "correction_bound": "0.5*tanh(delta) in original box-logit coordinates",
+    "quality_positive_margin": 0.01,
+    "quality_threshold": 0.5,
+    "train": 1536,
+    "quality_calibration": 512,
+    "val": 256,
+    "selection": "Fixed final256step; quality threshold fixed0.5, no best-val selection",
+    "controls": "All methods receive the same1536 new official-training descriptions. Quality heads use512 image-disjoint training descriptions for128additional updates. Native_calibration also receives128extra native-loss updates on those512 to control extra supervision; compute and trainable capacity still differ.",
+    "supervision": "Native REC loss for head adaptation; native L1+GIoU for frozen-head box corrections (mask terms constant). No test labels.",
+    "scope": "Exploratory reused256val; new training data is not an architectural contribution; no novelty claim"
+  },
+  "baseline": {
+    "train": {
+      "acc50": 74.21875,
+      "acc75": 55.208335876464844,
+      "miou": 64.16565704345703,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "calibration": {
+      "acc50": 75.5859375,
+      "acc75": 57.6171875,
+      "miou": 65.68327331542969,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "val": {
+      "acc50": 75.78125,
+      "acc75": 57.8125,
+      "miou": 66.45618438720703,
+      "corrected": 0,
+      "regressed": 0
+    }
+  },
+  "results": {
+    "native_42": {
+      "final": {
+        "acc50": 75.0,
+        "acc75": 55.078125,
+        "miou": 65.37224578857422,
+        "corrected": 1,
+        "regressed": 3
+      },
+      "train": {
+        "acc50": 74.93489837646484,
+        "acc75": 55.72916793823242,
+        "miou": 64.90255737304688,
+        "corrected": 15,
+        "regressed": 4
+      },
+      "parameters": 2954500,
+      "steps": 256
+    },
+    "native_calibration_42": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 56.640625,
+        "miou": 66.07823181152344,
+        "corrected": 1,
+        "regressed": 2
+      },
+      "steps": 384,
+      "note": "256new-train updates plus128extra calibration-label updates"
+    },
+    "global_42": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 57.8125,
+        "miou": 66.42021179199219,
+        "corrected": 0,
+        "regressed": 1
+      },
+      "train": {
+        "acc50": 74.47917175292969,
+        "acc75": 55.46875,
+        "miou": 64.3660659790039,
+        "corrected": 4,
+        "regressed": 0
+      },
+      "parameters": 95284,
+      "steps": 256
+    },
+    "global_quality_42": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.421875,
+        "miou": 66.43221282958984,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "accepted": 3,
+      "calibration_positive_rate": 0.125,
+      "quality_auc": 0.852729856967926,
+      "oracle_correctable": 0,
+      "oracle_note": "Post-hoc diagnostic upper bound, never inference selection"
+    },
+    "roi_42": {
+      "final": {
+        "acc50": 76.5625,
+        "acc75": 56.640625,
+        "miou": 66.51236724853516,
+        "corrected": 3,
+        "regressed": 1
+      },
+      "train": {
+        "acc50": 74.8046875,
+        "acc75": 56.70573043823242,
+        "miou": 65.22814178466797,
+        "corrected": 15,
+        "regressed": 6
+      },
+      "parameters": 93364,
+      "steps": 256
+    },
+    "roi_quality_42": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.8125,
+        "miou": 66.45618438720703,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "accepted": 1,
+      "calibration_positive_rate": 0.35546875,
+      "quality_auc": 0.5771732926368713,
+      "oracle_correctable": 3,
+      "oracle_note": "Post-hoc diagnostic upper bound, never inference selection"
+    },
+    "native_43": {
+      "final": {
+        "acc50": 75.0,
+        "acc75": 56.640625,
+        "miou": 65.8153076171875,
+        "corrected": 1,
+        "regressed": 3
+      },
+      "train": {
+        "acc50": 74.93489837646484,
+        "acc75": 56.640625,
+        "miou": 65.13768768310547,
+        "corrected": 16,
+        "regressed": 5
+      },
+      "parameters": 2954500,
+      "steps": 256
+    },
+    "native_calibration_43": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 54.6875,
+        "miou": 65.96060943603516,
+        "corrected": 2,
+        "regressed": 2
+      },
+      "steps": 384,
+      "note": "256new-train updates plus128extra calibration-label updates"
+    },
+    "global_43": {
+      "final": {
+        "acc50": 75.390625,
+        "acc75": 57.8125,
+        "miou": 66.43315124511719,
+        "corrected": 0,
+        "regressed": 1
+      },
+      "train": {
+        "acc50": 74.47917175292969,
+        "acc75": 55.53385543823242,
+        "miou": 64.36249542236328,
+        "corrected": 4,
+        "regressed": 0
+      },
+      "parameters": 95284,
+      "steps": 256
+    },
+    "global_quality_43": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.8125,
+        "miou": 66.45618438720703,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "accepted": 1,
+      "calibration_positive_rate": 0.140625,
+      "quality_auc": 0.7923439145088196,
+      "oracle_correctable": 0,
+      "oracle_note": "Post-hoc diagnostic upper bound, never inference selection"
+    },
+    "roi_43": {
+      "final": {
+        "acc50": 76.171875,
+        "acc75": 57.8125,
+        "miou": 66.6184310913086,
+        "corrected": 2,
+        "regressed": 1
+      },
+      "train": {
+        "acc50": 75.390625,
+        "acc75": 57.2265625,
+        "miou": 65.3270492553711,
+        "corrected": 19,
+        "regressed": 1
+      },
+      "parameters": 93364,
+      "steps": 256
+    },
+    "roi_quality_43": {
+      "final": {
+        "acc50": 75.78125,
+        "acc75": 57.8125,
+        "miou": 66.45618438720703,
+        "corrected": 0,
+        "regressed": 0
+      },
+      "accepted": 0,
+      "calibration_positive_rate": 0.318359375,
+      "quality_auc": 0.5756168961524963,
+      "oracle_correctable": 2,
+      "oracle_note": "Post-hoc diagnostic upper bound, never inference selection"
+    }
+  },
+  "seconds": 17.645271772053093
+}

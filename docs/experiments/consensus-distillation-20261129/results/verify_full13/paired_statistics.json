@@ -1,0 +1,26 @@
+{
+  "candidate": "verified_consensus_0.02",
+  "samples": 10758,
+  "corrected": 123,
+  "regressed": 64,
+  "expression_exact_mcnemar_p": 1.9142511571064113e-05,
+  "acc50": {
+    "delta_pp": 0.548429076036438,
+    "ci95_pp": [
+      0.27137487438283,
+      0.8183655737440572
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  },
+  "miou": {
+    "delta_pp": 0.6048593670129776,
+    "ci95_pp": [
+      0.4952168940196218,
+      0.7140694043265815
+    ],
+    "clusters": 1500,
+    "draws": 5000
+  },
+  "scope": "Fixed-model paired image-cluster resampling; no training-seed uncertainty or multiple-search correction. Val estimates remain exploratory after method search."
+}

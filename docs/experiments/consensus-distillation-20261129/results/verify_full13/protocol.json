@@ -1,0 +1,25 @@
+{
+  "split": "val",
+  "full": true,
+  "confirmation": false,
+  "samples": 10758,
+  "verify": true,
+  "rules": [
+    "original",
+    "flip",
+    "mean",
+    "consensus_mean",
+    "valid_projection",
+    "consensus_projection"
+  ],
+  "consensus_iou": 0.5,
+  "direction_policy": "No change on expressions containing left/right/compass-direction/clock tokens; all methods fall back to original",
+  "scope": "Fixed inference rules with extra forward cost; no novelty claim; validation reused, final test only after config freeze",
+  "verification_margins": [
+    0.0,
+    0.02,
+    0.05
+  ],
+  "frozen_primary": "verified_consensus_0.02",
+  "selection": "Primary margin0.02 fixed before full validation; train-calibration512 only. Other margins reported as diagnostics, not selected on final evaluation."
+}

@@ -81,6 +81,8 @@ def get_args_parser():
     parser.add_argument('--use_box_mask_constraints', action='store_true', help="If true, use box mask constraints")
     parser.add_argument('--use_mask_loss', action='store_true', help="If true, use segmentation loss")
     parser.add_argument('--use_regress_box', action='store_true', help="If true, enable regress box loss")
+    parser.add_argument('--rec_refinement', default='none', choices=['none', 'valid_projection', 'verified_flip'],
+                        help='Optional REC inference refinement; verified_flip uses two forwards. Validated with FP32 evaluation.')
     parser.add_argument('--enable_ref_mlm', action='store_true', help="If true, use mlm loss")
     parser.add_argument('--enable_ref_mim', action='store_true', help="If true, use mim loss")
     parser.add_argument('--enable_dynamic_mim', action='store_true', help="If true, use mim loss")

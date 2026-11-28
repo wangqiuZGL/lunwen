@@ -1,0 +1,22 @@
+{
+  "seeds": [
+    42,
+    43
+  ],
+  "steps": 256,
+  "batch": 32,
+  "native_head_lr": 3e-05,
+  "correction_lr": 0.0003,
+  "quality_steps": 128,
+  "quality_lr": 0.001,
+  "correction_bound": "0.5*tanh(delta) in original box-logit coordinates",
+  "quality_positive_margin": 0.01,
+  "quality_threshold": 0.5,
+  "train": 1536,
+  "quality_calibration": 512,
+  "val": 256,
+  "selection": "Fixed final256step; quality threshold fixed0.5, no best-val selection",
+  "controls": "All methods receive the same1536 new official-training descriptions. Quality heads use512 image-disjoint training descriptions for128additional updates. Native_calibration also receives128extra native-loss updates on those512 to control extra supervision; compute and trainable capacity still differ.",
+  "supervision": "Native REC loss for head adaptation; native L1+GIoU for frozen-head box corrections (mask terms constant). No test labels.",
+  "scope": "Exploratory reused256val; new training data is not an architectural contribution; no novelty claim"
+}

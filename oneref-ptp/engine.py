@@ -201,7 +201,12 @@ def validate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
         # text_data = text_data.to(device)
 
         # 模型推理时返回5个值：pred_box, seg_mask, vision_cls, language_cls, ptp_grid_logits(None)
-        pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
+        refinement = getattr(args, 'rec_refinement', 'none')
+        if refinement == 'none':
+            pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
+        else:
+            from utils.rec_refinement import predict_refined
+            pred_box, seg_mask, img_cls, text_cls, _ = predict_refined(model, img_data.tensors, img_data.mask, text_data, refinement)
         miou, accu, mask_iou_list, I_list, U_list = eval_utils.trans_vg_eval_val(args, pred_box, target, seg_mask, tgt_mask)
 
         metric_logger.update_v2('box_miou', torch.mean(miou), batch_size)
@@ -241,7 +246,12 @@ def evaluate(args, model: torch.nn.Module, data_loader: Iterable, device: torch.
         # text_data = text_data.to(device)
 
         # 模型推理时返回5个值：pred_box, seg_mask, vision_cls, language_cls, ptp_grid_logits(None)
-        pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
+        refinement = getattr(args, 'rec_refinement', 'none')
+        if refinement == 'none':
+            pred_box, seg_mask, img_cls, text_cls, _ = model(img_data.tensors, img_data.mask, text_data)
+        else:
+            from utils.rec_refinement import predict_refined
+            pred_box, seg_mask, img_cls, text_cls, _ = predict_refined(model, img_data.tensors, img_data.mask, text_data, refinement)
 
         pred_box_list.append(pred_box.cpu())
         gt_box_list.append(target.cpu())

@@ -1,0 +1,88 @@
+{
+  "status": "completed",
+  "protocol": {
+    "samples": 2048,
+    "seeds": [
+      42,
+      43
+    ],
+    "selection": "Frozen final256step candidate and controls, no hyperparameter adjustment after enlarged evaluation",
+    "scope": "Disjoint images from current256 exploratory subset; official val previously used for baseline checkpoint selection and possibly older experiments, not an independent test",
+    "training": "Candidate and controls trained on1536 previously-unused official-training descriptions; native_calibration additionally sees512 calibration labels"
+  },
+  "results": {
+    "original": {
+      "acc50": 77.587890625,
+      "acc75": 59.86328125,
+      "miou": 66.75336456298828,
+      "corrected": 0,
+      "regressed": 0,
+      "delta_pp": 0.0
+    },
+    "native_42": {
+      "acc50": 77.34375,
+      "acc75": 56.689453125,
+      "miou": 65.96634674072266,
+      "corrected": 8,
+      "regressed": 13,
+      "delta_pp": -0.244140625
+    },
+    "native_calibration_42": {
+      "acc50": 77.392578125,
+      "acc75": 57.8125,
+      "miou": 66.20172119140625,
+      "corrected": 8,
+      "regressed": 12,
+      "delta_pp": -0.1953125
+    },
+    "global_42": {
+      "acc50": 77.734375,
+      "acc75": 59.86328125,
+      "miou": 66.71012878417969,
+      "corrected": 4,
+      "regressed": 1,
+      "delta_pp": 0.146484375
+    },
+    "roi_42": {
+      "acc50": 77.587890625,
+      "acc75": 58.69140625,
+      "miou": 66.72422790527344,
+      "corrected": 8,
+      "regressed": 8,
+      "delta_pp": 0.0
+    },
+    "native_43": {
+      "acc50": 77.5390625,
+      "acc75": 57.51953125,
+      "miou": 66.12368774414062,
+      "corrected": 8,
+      "regressed": 9,
+      "delta_pp": -0.048828125
+    },
+    "native_calibration_43": {
+      "acc50": 77.34375,
+      "acc75": 56.8359375,
+      "miou": 65.95442199707031,
+      "corrected": 11,
+      "regressed": 16,
+      "delta_pp": -0.244140625
+    },
+    "global_43": {
+      "acc50": 77.685546875,
+      "acc75": 59.326171875,
+      "miou": 66.70030975341797,
+      "corrected": 4,
+      "regressed": 2,
+      "delta_pp": 0.09765625
+    },
+    "roi_43": {
+      "acc50": 77.685546875,
+      "acc75": 59.5703125,
+      "miou": 66.86780548095703,
+      "corrected": 9,
+      "regressed": 7,
+      "delta_pp": 0.09765625
+    }
+  },
+  "seconds": 38.671992318937555
+}

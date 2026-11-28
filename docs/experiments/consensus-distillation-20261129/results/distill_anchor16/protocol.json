@@ -1,0 +1,23 @@
+{
+  "train": 512,
+  "val": 256,
+  "seeds": [
+    42,
+    43
+  ],
+  "arms": [
+    "anchored_quality"
+  ],
+  "steps": 256,
+  "batch": 32,
+  "lr": 1e-05,
+  "kd_weight": 2.0,
+  "margin": 0.01,
+  "min_teacher_iou": 0.5,
+  "teacher": "Frozen verified_consensus_0.02, original+flip two-view inference on official training only",
+  "student": "Frozen backbone cached final features, train original grounding heads only; single original-view inference",
+  "quality_rule": "Improvement gate selects verified teacher; rejected samples distill original frozen prediction. Original native/all_teacher controls from distill15 use identical batches, init and optimizer.",
+  "selection": "Fixed final256step, all arms and both seeds reported; exploratory val only, no testA/testB tuning",
+  "scope": "Small mechanism pilot, not full end-to-end training, no novelty or improvement claim before results",
+  "accepted": 146
+}

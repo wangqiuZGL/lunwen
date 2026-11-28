@@ -1,0 +1,116 @@
+{
+  "status": "completed",
+  "protocol": {
+    "split": "official_train_calibration",
+    "full": false,
+    "confirmation": false,
+    "samples": 512,
+    "verify": true,
+    "rules": [
+      "original",
+      "flip",
+      "mean",
+      "consensus_mean",
+      "valid_projection",
+      "consensus_projection"
+    ],
+    "consensus_iou": 0.5,
+    "direction_policy": "No change on expressions containing left/right/compass-direction/clock tokens; all methods fall back to original",
+    "scope": "Fixed inference rules with extra forward cost; no novelty claim; validation reused, final test only after config freeze"
+  },
+  "skipped": 18,
+  "accepted": 452,
+  "extra": {
+    "verified_0.0_accepts": 98,
+    "verified_0.02_accepts": 81,
+    "verified_0.05_accepts": 63,
+    "score_rule": "Area-normalized mean native patch cosine inside candidate, using only valid-image patch centers; candidate comparison within each of two aligned maps; both must prefer flipped candidate."
+  },
+  "results": {
+    "original": {
+      "acc50": 75.5859375,
+      "acc75": 57.6171875,
+      "miou": 65.68328094482422,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "flip": {
+      "acc50": 75.9765625,
+      "acc75": 55.2734375,
+      "miou": 65.18452453613281,
+      "corrected": 27,
+      "regressed": 25
+    },
+    "mean": {
+      "acc50": 73.2421875,
+      "acc75": 55.6640625,
+      "miou": 64.2598876953125,
+      "corrected": 6,
+      "regressed": 18
+    },
+    "consensus_mean": {
+      "acc50": 76.171875,
+      "acc75": 57.8125,
+      "miou": 65.91349792480469,
+      "corrected": 4,
+      "regressed": 1
+    },
+    "valid_projection": {
+      "acc50": 75.5859375,
+      "acc75": 57.8125,
+      "miou": 65.84765625,
+      "corrected": 0,
+      "regressed": 0
+    },
+    "consensus_projection": {
+      "acc50": 76.171875,
+      "acc75": 58.0078125,
+      "miou": 66.07643127441406,
+      "corrected": 4,
+      "regressed": 1
+    },
+    "verified_0.0": {
+      "acc50": 75.9765625,
+      "acc75": 56.8359375,
+      "miou": 65.7363052368164,
+      "corrected": 4,
+      "regressed": 2
+    },
+    "verified_consensus_0.0": {
+      "acc50": 76.3671875,
+      "acc75": 58.0078125,
+      "miou": 66.0523910522461,
+      "corrected": 5,
+      "regressed": 1
+    },
+    "verified_0.02": {
+      "acc50": 75.9765625,
+      "acc75": 56.640625,
+      "miou": 65.71761322021484,
+      "corrected": 4,
+      "regressed": 2
+    },
+    "verified_consensus_0.02": {
+      "acc50": 76.3671875,
+      "acc75": 58.0078125,
+      "miou": 66.0523910522461,
+      "corrected": 5,
+      "regressed": 1
+    },
+    "verified_0.05": {
+      "acc50": 75.78125,
+      "acc75": 57.03125,
+      "miou": 65.79566192626953,
+      "corrected": 3,
+      "regressed": 2
+    },
+    "verified_consensus_0.05": {
+      "acc50": 76.3671875,
+      "acc75": 58.0078125,
+      "miou": 66.0523910522461,
+      "corrected": 5,
+      "regressed": 1
+    }
+  },
+  "seconds": 21.990191735094413
+}
